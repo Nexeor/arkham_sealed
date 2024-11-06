@@ -1,7 +1,8 @@
 import json 
 import sys
-from models import get_engine, Cards, Investigators, Player_Cards, Asset_Card, Skill_Card, Event_Card
+from models import get_engine, Cards, Investigators, Player_Cards, Asset_Card, Traits
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 # 1) Read entire set file
 # 2) Iterate through cards one by one
@@ -24,12 +25,12 @@ def convert_bulk_json(json_file):
         with Session(engine) as session:
             for card in set:
                 if card['type_code'] in ["investigator", "asset", "event", "skill"]:
-                    db_card = create_card_v2(card, Cards)
+                    db_card = create_card(card, Cards)
                     session.add(db_card)
                     session.commit()
 
                     if card['type_code'] == "investigator":
-                        db_investigator = create_card_v2(card, Investigators)
+                        db_investigator = create_card(card, Investigators)
 
                         card_text, elder_sign = card["text"].split("\n[elder_sign] effect: ") 
                         db_investigator.card_text = card_text
@@ -40,33 +41,19 @@ def convert_bulk_json(json_file):
                         session.commit()   
 
                     if card['type_code'] in ["asset", "event", "skill"]:
-                        db_player_card = create_card_v2(card, Player_Cards)
+                        db_player_card = create_card(card, Player_Cards)
                         db_card.player_cards.append(db_player_card)
                         session.add(db_player_card)
                         session.commit()
                         
                         if card['type_code'] == 'asset':
-                            db_asset_card = create_card_v2(card, Asset_Card)
+                            db_asset_card = create_card(card, Asset_Card)
                             db_player_card.assets.append(db_asset_card)
                             session.add(db_asset_card)
                             session.commit()
-
-                        if card['type_code'] == 'event':
-                            db_event_card = create_card_v2(card, Event_Card)
-                            db_player_card.assets.append(db_event_card)
-                            session.add(db_event_card)
-                            session.commit()
-                        
-                        if card['type_code'] == 'skill':
-                            db_skill_card = create_card_v2(card, Skill_Card)
-                            db_player_card.assets.append(db_skill_card)
-                            session.add(db_skill_card)
-                            session.commit()
                         
 
-
-
-def create_card_v2(json_card, table):
+def create_card(json_card, table):
     db_card = table()
     db_card = set_attr(json_card, db_card, table)      
 
@@ -79,11 +66,13 @@ def set_attr(json_card, db_card, table):
     db_attributes = [attr for attr in db_attributes if attr[0] != "_"]
     
     for db_attr in db_attributes:
+        print(db_attr)
         # If JSON attribute is different, translate
         json_attr = ATTRIBUTE_DB_TO_JSON.get(db_attr, db_attr)
 
-        if json_attr in json_card:
+        if json_attr in json_card and json_attr != "traits":
             setattr(db_card, db_attr, json_card[json_attr])
+            
     
     print("New Card:", db_card)
     return db_card    
