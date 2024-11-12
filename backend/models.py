@@ -43,7 +43,7 @@ class Traits(Base):
         secondary=card_traits, back_populates="traits"
     )
     
-    trait: Mapped[str] = mapped_column(unique=True)
+    trait: Mapped[str] # = mapped_column(unique=True)
 
 # Traits only held by investigators
 class Investigators(Base):

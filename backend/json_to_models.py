@@ -1,6 +1,7 @@
 import json 
 import sys
 from models import get_engine, Cards, Investigators, Player_Cards, Asset_Card, Traits
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -12,6 +13,7 @@ from sqlalchemy.exc import IntegrityError
 # 5) Then detect if player or investigator card and fill out corresponding entry
 # 6) Add relevant deckbuilding options, card traits, factions, uses, symbols, etc.
 
+valid_types = ["investigator", "asset", "event", "skill"]
 
 # Takes a bulk JSON file of a set from ArkhamDB and converts it to the
 # correct models
@@ -24,10 +26,15 @@ def convert_bulk_json(json_file):
 
         with Session(engine) as session:
             for card in set:
-                if card['type_code'] in ["investigator", "asset", "event", "skill"]:
+                if card['type_code'] in valid_types:
                     db_card = create_card(card, Cards)
                     session.add(db_card)
                     session.commit()
+                    
+                    if "traits" in card:
+                        trait_list = card['traits'].split(". ")
+                        for trait in trait_list:
+                            add_trait(trait, db_card, session)
 
                     if card['type_code'] == "investigator":
                         db_investigator = create_card(card, Investigators)
@@ -58,6 +65,17 @@ def create_card(json_card, table):
     db_card = set_attr(json_card, db_card, table)      
 
     return db_card
+
+def add_trait(trait_name, db_card, session):
+    # In new trait, create and add to card
+    db_trait = session.scalars(select(Traits).where(Traits.trait == trait_name)).first()
+    if db_trait is None:
+        print("New trait! ", trait_name)
+        db_trait = Traits(trait = trait_name)
+        session.add(db_trait)
+    
+    db_card.traits.append(db_trait)
+    session.commit()
         
 
 def set_attr(json_card, db_card, table):
