@@ -4,11 +4,20 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, declarative_base, rel
 
 Base = declarative_base() 
 
+# Join cards with their traits
 card_traits = Table(
     'card_traits', 
     Base.metadata,
     Column('card_id', ForeignKey("cards.id"), primary_key=True),
     Column('trait_id', ForeignKey("traits.id"), primary_key=True)
+)
+
+# Join assets with their uses
+asset_uses = Table(
+    'asset_uses', 
+    Base.metadata,
+    Column('asset_id', ForeignKey("assets.id"), primary_key=True),
+    Column('uses_id', ForeignKey("uses.id"), primary_key=True)
 )
 
 # Both investigator and player cards share some key traits
@@ -82,7 +91,7 @@ class Player_Cards(Base):
     investigator_id: Mapped[Optional[int]] = mapped_column(ForeignKey("investigator_cards.id"))
 
     # Relationships (Children)
-    assets: Mapped[List["Asset_Card"]] = relationship()
+    assets: Mapped[List["Assets"]] = relationship()
 
     # Mandatory Traits
     xp_cost: Mapped[int] = mapped_column(default=0)
@@ -100,56 +109,43 @@ class Player_Cards(Base):
     
 
 
-class Asset_Card(Base):
-    __tablename__ = "asset_cards"
+class Assets(Base):
+    __tablename__ = "assets"
     id: Mapped[int] = mapped_column(primary_key=True)
 
     # Relationships (Parents)
     player_card_id : Mapped[int] = mapped_column(ForeignKey("player_cards.id"))
     
+    # Relationship (Join table)
+    uses: Mapped[List["Uses"]] = relationship(
+        secondary=asset_uses, back_populates="assets"
+    )
+    
     # Optional Fields
     slot: Mapped[Optional[str]]
     health: Mapped[Optional[int]]
     sanity: Mapped[Optional[int]] 
-    
 
-class Deckbuilding_Options(Base):
-    __tablename__ = "deckbuilding_options"
-
+class Uses(Base):
+    __tablename__ = "uses"
     id: Mapped[int] = mapped_column(primary_key=True)
-    investigator_id: Mapped[Optional[int]] = mapped_column(ForeignKey("investigator_cards.id"))
     
-    # Must draw from a cardpool, either the faction, types of uses, or trait
-    faction: Mapped[Optional[str]]
-    trait: Mapped[Optional[str]]
-    uses: Mapped[Optional[str]]
-    min_xp: Mapped[int]
-    max_xp: Mapped[int]
-    max_num: Mapped[int]
+    # Relationship (Join table)
+    assets: Mapped[List["Assets"]] = relationship(
+        secondary=asset_uses, back_populates="uses"
+    )
     
-    # Use this field to define a group of forbidden cards
-    allowed: Mapped[bool]    
-
-
-
-
-
-# Used to represent "uses" on cards (charges, supplies, ammo)
-class Card_Uses(Base):
-    __tablename__ = "card_uses"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    card_id: Mapped[int] = mapped_column(ForeignKey("player_cards.id"))
-    type: Mapped[str]
-    num_uses: Mapped[int]   
-    
+    num_uses: Mapped[int]
+       
 
 # Creates and returns an engine to interact with the database
 def get_engine(reset):
     engine = create_engine("sqlite:///example.db", echo=True)
     
-    Base.metadata.drop_all(bind=engine)    
-    Base.metadata.create_all(bind=engine, checkfirst=False)
+    if reset:
+        Base.metadata.drop_all(bind=engine)   
+     
+    Base.metadata.create_all(bind=engine, checkfirst=True)
 
     return engine
     

@@ -1,6 +1,6 @@
 import json 
 import sys
-from models import get_engine, Cards, Investigators, Player_Cards, Asset_Card, Traits
+from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -29,7 +29,7 @@ def convert_bulk_json(json_file):
                 if card['type_code'] in valid_types:
                     db_card = create_card(card, Cards)
                     session.add(db_card)
-                    session.commit()
+                    # session.commit()
                     
                     if "traits" in card:
                         trait_list = card['traits'].split(". ")
@@ -54,7 +54,7 @@ def convert_bulk_json(json_file):
                         session.commit()
                         
                         if card['type_code'] == 'asset':
-                            db_asset_card = create_card(card, Asset_Card)
+                            db_asset_card = create_card(card, Assets)
                             db_player_card.assets.append(db_asset_card)
                             session.add(db_asset_card)
                             session.commit()
