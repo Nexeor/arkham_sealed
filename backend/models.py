@@ -4,6 +4,13 @@ from sqlalchemy.orm import Mapped, Session, mapped_column, declarative_base, rel
 
 Base = declarative_base() 
 
+card_traits = Table(
+    'card_traits', 
+    Base.metadata,
+    Column('card_id', ForeignKey("cards.id"), primary_key=True),
+    Column('trait_id', ForeignKey("traits.id"), primary_key=True)
+)
+
 # Both investigator and player cards share some key traits
 class Cards(Base):
     __tablename__ = "cards"
@@ -11,6 +18,11 @@ class Cards(Base):
     # Relationships (Children)
     investigators: Mapped[List["Investigators"]] = relationship()
     player_cards: Mapped[List["Player_Cards"]] = relationship()
+    
+    # Relationship (Join Table)
+    traits: Mapped[List["Traits"]] = relationship(
+        secondary=card_traits, back_populates="cards"
+    )
 
     # Mandatory Traits
     id : Mapped[int] = mapped_column(primary_key = True)
@@ -21,6 +33,17 @@ class Cards(Base):
     collector_number: Mapped[int]
     artist: Mapped[str]
 
+# Used to represent cards traits
+class Traits(Base):
+    __tablename__ = "traits"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    
+    # Relationships (Join table)
+    cards: Mapped[List["Cards"]] = relationship(
+        secondary=card_traits, back_populates="traits"
+    )
+    
+    trait: Mapped[str] = mapped_column(unique=True)
 
 # Traits only held by investigators
 class Investigators(Base):
@@ -48,12 +71,6 @@ class Investigators(Base):
     # Optional Fields
     flavor_front: Mapped[Optional[str]]
 
-join_player_card_to_trait = Table(
-    'join_player_card_to_trait', 
-    Base.metadata,
-    Column('player_card_id', ForeignKey("player_cards.id"), primary_key=True),
-    Column('trait_id', ForeignKey("traits.id"), primary_key=True)
-)
 
 # Traits only held by player cards
 class Player_Cards(Base):
@@ -66,11 +83,6 @@ class Player_Cards(Base):
 
     # Relationships (Children)
     assets: Mapped[List["Asset_Card"]] = relationship()
-    
-    # Relationship (Join Table)
-    traits: Mapped[List["Traits"]] = relationship(
-        secondary=join_player_card_to_trait, back_populates="player_cards"
-    )
 
     # Mandatory Traits
     xp_cost: Mapped[int] = mapped_column(default=0)
@@ -86,18 +98,6 @@ class Player_Cards(Base):
     text: Mapped[Optional[str]]
     flavor_text: Mapped[Optional[str]]
     
-
-# Used to represent cards traits
-class Traits(Base):
-    __tablename__ = "traits"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    
-    # Relationships (Join table)
-    player_cards: Mapped[List["Player_Cards"]] = relationship(
-        secondary=join_player_card_to_trait, back_populates="traits"
-    )
-    
-    trait: Mapped[str] = mapped_column(unique=True)
 
 
 class Asset_Card(Base):
