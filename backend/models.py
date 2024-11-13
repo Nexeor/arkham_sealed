@@ -17,7 +17,7 @@ asset_uses = Table(
     'asset_uses', 
     Base.metadata,
     Column('asset_id', ForeignKey("assets.id"), primary_key=True),
-    Column('uses_id', ForeignKey("uses.id"), primary_key=True)
+    Column('uses_id', ForeignKey("uses.id"), primary_key=True),
 )
 
 # Both investigator and player cards share some key traits
@@ -135,7 +135,7 @@ class Uses(Base):
         secondary=asset_uses, back_populates="uses"
     )
     
-    num_uses: Mapped[int]
+    type: Mapped[str]
        
 
 # Creates and returns an engine to interact with the database

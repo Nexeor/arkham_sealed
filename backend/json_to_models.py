@@ -1,6 +1,7 @@
 import json 
 import sys
-from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits
+import re
+from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -27,64 +28,93 @@ def convert_bulk_json(json_file):
         with Session(engine) as session:
             for card in set:
                 if card['type_code'] in valid_types:
-                    db_card = create_card(card, Cards)
-                    session.add(db_card)
-                    # session.commit()
-                    
-                    if "traits" in card:
-                        trait_list = card['traits'].split(". ")
-                        for trait in trait_list:
-                            add_trait(trait, db_card, session)
+                    create_card(card, session)                        
 
-                    if card['type_code'] == "investigator":
-                        db_investigator = create_card(card, Investigators)
+def create_card(json_card, session):
+    db_card = Cards()
+    db_card = set_attr(json_card, db_card, Cards)     
+    session.add(db_card)
+    
+    if "traits" in json_card:
+        trait_list = json_card['traits'].split(". ")
+        for trait in trait_list:
+            add_trait(trait, db_card, session) 
+    
+    if json_card['type_code'] == "investigator":
+        db_investigator = Investigators()
+        db_investigator = set_attr(json_card, db_investigator, Investigators) 
+        
+        db_investigator.card_text, db_investigator.elder_sign = json_card['text'].split("\n[elder_sign] effect: ")
 
-                        card_text, elder_sign = card["text"].split("\n[elder_sign] effect: ") 
-                        db_investigator.card_text = card_text
-                        db_investigator.elder_sign = elder_sign
+        # TODO: Create "deckbuilding_options" here
+        
+        db_card.investigators.append(db_investigator)
+        session.add(db_investigator)
+    
+    elif json_card['type_code'] in ["asset", "event", "skill"]:
+        db_player_card = Player_Cards()
+        db_player_card = set_attr(json_card, db_player_card, Player_Cards)
+        db_card.player_cards.append(db_player_card)
+        session.add(db_player_card)
+        
+        if json_card['type_code'] == 'asset':
+            db_asset_card = Assets()
+            db_player_card.assets.append(db_asset_card)
+            session.add(db_asset_card)
+            
+            """
+            match = re.search("Uses \((\d+) (\w+)\)", json_card['text'])
+            if match:
+                add_uses(match.group(2), int(match.group(1)))
+            """
+    
+    session.commit()
 
-                        db_card.investigators.append(db_investigator)
-                        session.add(db_investigator)
-                        session.commit()   
-
-                    if card['type_code'] in ["asset", "event", "skill"]:
-                        db_player_card = create_card(card, Player_Cards)
-                        db_card.player_cards.append(db_player_card)
-                        session.add(db_player_card)
-                        session.commit()
-                        
-                        if card['type_code'] == 'asset':
-                            db_asset_card = create_card(card, Assets)
-                            db_player_card.assets.append(db_asset_card)
-                            session.add(db_asset_card)
-                            session.commit()
-                        
-
-def create_card(json_card, table):
-    db_card = table()
-    db_card = set_attr(json_card, db_card, table)      
-
-    return db_card
-
-def add_trait(trait_name, db_card, session):
-    # In new trait, create and add to card
+def add_trait(trait_name, parent_card, session):
+    # If new trait, create it and add to card
     db_trait = session.scalars(select(Traits).where(Traits.trait == trait_name)).first()
     if db_trait is None:
         print("New trait! ", trait_name)
         db_trait = Traits(trait = trait_name)
         session.add(db_trait)
     
-    db_card.traits.append(db_trait)
-    session.commit()
+    parent_card.traits.append(db_trait)
+    
+def add_uses(type, parent_asset, session):
+    # In new use type, create it and add to card
+    db_type = session.scalars(select(Uses).where(Uses.type == type)).first()
+    if db_type is None:
+        print("New trait! ", type)
+        db_type = Uses(type = type)
+        session.add(db_type)
+    
+    parent_asset.uses.append(db_type)
         
+        
+"""
+Maps attributes from a JSON object to a database model instance.
 
+This function iterates over the public attributes of a given database model
+(specified by `table`) and sets the corresponding attributes in the `db_card`
+instance based on the `json_card` dictionary. If a mapping exists in the 
+`ATTRIBUTE_DB_TO_JSON` dictionary, it uses the mapped JSON attribute name;
+otherwise, it uses the attribute name directly. The function skips any 
+attribute named "traits".
+
+Parameters:
+- json_card (dict): The source data in JSON format with attributes to map.
+- db_card (object): The database model instance where attributes will be set.
+- table (class): The database model class, used to retrieve its attribute names.
+
+Returns:
+- db_card (object): The updated database model instance with attributes set.
+"""
 def set_attr(json_card, db_card, table):
     # Get the table's attributes
     db_attributes = dir(table)
     db_attributes = [attr for attr in db_attributes if attr[0] != "_"]
     
     for db_attr in db_attributes:
-        print(db_attr)
         # If JSON attribute is different, translate
         json_attr = ATTRIBUTE_DB_TO_JSON.get(db_attr, db_attr)
 
