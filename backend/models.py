@@ -12,14 +12,18 @@ card_traits = Table(
     Column('trait_id', ForeignKey("traits.id"), primary_key=True)
 )
 
-# Join assets with their uses
-asset_uses = Table(
-    'asset_uses', 
-    Base.metadata,
-    Column('asset_id', ForeignKey("assets.id"), primary_key=True),
-    Column('uses_id', ForeignKey("uses.id"), primary_key=True),
-)
-
+class Asset_Uses(Base):
+    __tablename__ = "asset_uses"
+    
+    # Relationships
+    uses_id: Mapped[int] = mapped_column(ForeignKey("uses.id"), primary_key=True)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), primary_key=True)
+    
+    use: Mapped["Uses"] = relationship(back_populates="assets")
+    asset: Mapped["Assets"] = relationship(back_populates="uses")
+    
+    num_uses: Mapped[int]
+    
 # Both investigator and player cards share some key traits
 class Cards(Base):
     __tablename__ = "cards"
@@ -108,18 +112,15 @@ class Player_Cards(Base):
     flavor_text: Mapped[Optional[str]]
     
 
-
 class Assets(Base):
     __tablename__ = "assets"
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Relationships (Parents)
+    # Parents
     player_card_id : Mapped[int] = mapped_column(ForeignKey("player_cards.id"))
     
-    # Relationship (Join table)
-    uses: Mapped[List["Uses"]] = relationship(
-        secondary=asset_uses, back_populates="assets"
-    )
+    # Associations
+    uses: Mapped[List[Asset_Uses]] = relationship(back_populates="asset")
     
     # Optional Fields
     slot: Mapped[Optional[str]]
@@ -130,14 +131,12 @@ class Uses(Base):
     __tablename__ = "uses"
     id: Mapped[int] = mapped_column(primary_key=True)
     
-    # Relationship (Join table)
-    assets: Mapped[List["Assets"]] = relationship(
-        secondary=asset_uses, back_populates="uses"
-    )
+    # Associations
+    assets: Mapped[List[Asset_Uses]] = relationship(back_populates="use")
     
+    # Mandatory fields
     type: Mapped[str]
        
-
 # Creates and returns an engine to interact with the database
 def get_engine(reset):
     engine = create_engine("sqlite:///example.db", echo=True)

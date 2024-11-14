@@ -59,6 +59,7 @@ def create_card(json_card, session):
         
         if json_card['type_code'] == 'asset':
             db_asset_card = Assets()
+            db_asset_card = set_attr(json_card, db_asset_card, Assets)
             db_player_card.assets.append(db_asset_card)
             session.add(db_asset_card)
             
