@@ -139,7 +139,7 @@ class Uses(Base):
        
 # Creates and returns an engine to interact with the database
 def get_engine(reset):
-    engine = create_engine("sqlite:///example.db", echo=True)
+    engine = create_engine("sqlite:///example.db")
     
     if reset:
         Base.metadata.drop_all(bind=engine)   

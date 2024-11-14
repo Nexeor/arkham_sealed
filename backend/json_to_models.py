@@ -1,7 +1,7 @@
 import json 
 import sys
 import re
-from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses
+from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -63,11 +63,10 @@ def create_card(json_card, session):
             db_player_card.assets.append(db_asset_card)
             session.add(db_asset_card)
             
-            """
-            match = re.search("Uses \((\d+) (\w+)\)", json_card['text'])
-            if match:
-                add_uses(match.group(2), int(match.group(1)))
-            """
+            if 'text' in json_card:
+                match = re.search("Uses \((\d+) (\w+)\)", json_card['text'])
+                if match:
+                    add_uses(match.group(2), int(match.group(1)), db_asset_card, session)
     
     session.commit()
 
@@ -80,16 +79,21 @@ def add_trait(trait_name, parent_card, session):
         session.add(db_trait)
     
     parent_card.traits.append(db_trait)
-    
-def add_uses(type, parent_asset, session):
+
+
+def add_uses(type, total_uses, child_asset, session):
     # In new use type, create it and add to card
-    db_type = session.scalars(select(Uses).where(Uses.type == type)).first()
-    if db_type is None:
-        print("New trait! ", type)
-        db_type = Uses(type = type)
-        session.add(db_type)
+    db_uses = session.scalars(select(Uses).where(Uses.type == type)).first()
+    if db_uses is None:
+        print("New use type! ", type)
+        db_uses = Uses(type = type)
+        session.add(db_uses)
     
-    parent_asset.uses.append(db_type)
+    # Add uses and asset to the association table
+    asset_uses = Asset_Uses(num_uses = total_uses)
+    asset_uses.asset = child_asset
+    db_uses.assets.append(asset_uses)
+    session.add(asset_uses)
         
         
 """
