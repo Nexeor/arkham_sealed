@@ -1,7 +1,7 @@
 import json 
 import sys
 import re
-from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses
+from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses, Factions
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -23,9 +23,10 @@ def convert_bulk_json(json_file):
     with open(json_file, 'r') as file:
         # Load the set as a python dict
         set = json.load(file)
-        engine = get_engine(True)
+        engine = get_engine(rebuild=True, debug=True)
 
         with Session(engine) as session:
+            add_factions(session)
             for card in set:
                 if card['type_code'] in valid_types:
                     create_card(card, session)                        
@@ -130,6 +131,12 @@ def set_attr(json_card, db_card, table):
     print("New Card:", db_card)
     return db_card    
 
+def add_factions(session):
+    for faction in ["Guardian", "Seeker", "Rogue", "Survivor", "Mystic", "Neutral"]:
+        new_faction = Factions(faction_name=faction)
+        session.add(new_faction)
+    
+    session.commit()
 
 ATTRIBUTE_DB_TO_JSON = {
     'cycle' : 'pack_name',

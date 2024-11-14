@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey, Column, Table, create_engine
 from typing import Optional, List
-from sqlalchemy.orm import Mapped, Session, mapped_column, declarative_base, relationship
+from sqlalchemy.orm import Mapped, mapped_column, declarative_base, relationship
 
 Base = declarative_base() 
 
@@ -67,7 +67,8 @@ class Investigators(Base):
     card_id: Mapped[int] = mapped_column(ForeignKey("cards.id"))
 
     # Relationships (Children)
-    related_cards: Mapped[List["Cards"]] = relationship()
+    related_cards: Mapped[List['Cards']] = relationship()
+    deckbuilding_options: Mapped[List['Deckbuilding_Options']] = relationship(back_populates="investigator")
     
     # Mandatory Fields
     nickname: Mapped[str]
@@ -84,6 +85,34 @@ class Investigators(Base):
     # Optional Fields
     flavor_front: Mapped[Optional[str]]
 
+class Deckbuilding_Options(Base):
+    __tablename__ = "deckbuilding_options"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    
+    # Relationships (Parents) 
+    investigator_id: Mapped[int] = mapped_column(ForeignKey('investigator_cards.id'))
+    investigator: Mapped['Investigators'] = relationship(back_populates='deckbuilding_options')
+    
+    # Relationships (Children)
+    faction_id: Mapped[Optional[int]] = mapped_column(ForeignKey("factions.id"))
+    faction: Mapped[Optional['Factions']] = relationship(back_populates='deckbuilding_options')
+    
+    # Mandatory Fields
+    min_xp: Mapped[int]
+    max_xp: Mapped[int]
+    max_num: Mapped[int] 
+    # True if disallowing these cards (ex: no "fortune" cards, mark illegal as true)
+    illegal: Mapped[bool] = mapped_column(default=0) 
+
+class Factions(Base):
+    __tablename__ = "factions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    
+    # Parents
+    deckbuilding_options: Mapped[List['Deckbuilding_Options']] = relationship(back_populates='faction')
+    
+    # Mandatory Fields
+    faction_name: Mapped[str]
 
 # Traits only held by player cards
 class Player_Cards(Base):
@@ -110,7 +139,6 @@ class Player_Cards(Base):
     resource_cost: Mapped[Optional[int]]
     text: Mapped[Optional[str]]
     flavor_text: Mapped[Optional[str]]
-    
 
 class Assets(Base):
     __tablename__ = "assets"
@@ -138,10 +166,10 @@ class Uses(Base):
     type: Mapped[str]
        
 # Creates and returns an engine to interact with the database
-def get_engine(reset):
-    engine = create_engine("sqlite:///example.db")
+def get_engine(rebuild, debug):
+    engine = create_engine("sqlite:///example.db", echo=debug)
     
-    if reset:
+    if rebuild:
         Base.metadata.drop_all(bind=engine)   
      
     Base.metadata.create_all(bind=engine, checkfirst=True)
