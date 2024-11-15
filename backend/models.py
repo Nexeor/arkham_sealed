@@ -27,14 +27,32 @@ class Cards(Base):
         secondary=card_traits, back_populates="cards"
     )
 
-    # Mandatory Traits
+    # Traits
     id : Mapped[int] = mapped_column(primary_key = True)
     type: Mapped[str] 
     name: Mapped[str]
+    subname: Mapped[Optional[str]]
     cycle: Mapped[str]
     card_pack: Mapped[str]
     collector_number: Mapped[int]
     artist: Mapped[str]
+    
+    def __repr__(self):
+        # Create a list to hold the core information
+        card_info = [
+            f"ID: {self.id}",
+            f"Type: {self.type}",
+            f"Name: '{self.name}'",
+            f"Subname: '{self.subname}'",
+            f"Cycle: '{self.cycle}'",
+            f"Card Pack: '{self.card_pack}'",
+            f"Collector Number: {self.collector_number}",
+            f"Artist: '{self.artist}'"
+        ]
+        
+        # Join all the information together
+        return f"Cards({', '.join(card_info)})"
+    
 
 # Traits only held by investigators
 class Investigators(Base):
@@ -48,7 +66,7 @@ class Investigators(Base):
     # Each investigator (child) belongs to a faction (parent)
     faction_id: Mapped[int] = mapped_column(ForeignKey("factions.id"))
     faction: Mapped['Factions'] = relationship(back_populates='investigators')
-
+    
     # Children: One to Many 
     # Each investigator (parent) can have many deckbuilding options (child)
     deckbuilding_options: Mapped[List['Deckbuilding_Options']] = relationship(back_populates="investigator")
@@ -58,6 +76,7 @@ class Investigators(Base):
     # Mandatory Fields
     nickname: Mapped[str]
     card_text: Mapped[str]
+    card_text_back: Mapped[str]
     elder_sign: Mapped[str]
     willpower: Mapped[int]
     intellect: Mapped[int]
@@ -65,6 +84,9 @@ class Investigators(Base):
     agility: Mapped[int]
     health: Mapped[int]
     sanity: Mapped[int]
+    deck_size: Mapped[int]
+    deckbuilding_options_text: Mapped[str]
+    deckbuilding_requirements_text: Mapped[str]
     flavor_back: Mapped[str]
     
     # Optional Fields
@@ -101,9 +123,9 @@ class Player_Cards(Base):
     skill_combat: Mapped[int] = mapped_column(default=0)
     skill_agility: Mapped[int] = mapped_column(default=0)
     skill_wild: Mapped[int] = mapped_column(default=0)
+    is_weakness: Mapped[bool] = mapped_column(default=False)
     
     # Optional Fields
-    is_weakness: Mapped[Optional[bool]]
     resource_cost: Mapped[Optional[int]]
     text: Mapped[Optional[str]]
     flavor_text: Mapped[Optional[str]]

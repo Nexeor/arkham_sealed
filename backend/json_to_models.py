@@ -29,7 +29,9 @@ def convert_bulk_json(json_file, debug):
             add_factions(session)
             for card in set:
                 if card['type_code'] in valid_types:
-                    create_card(card, session)                        
+                    create_card(card, session)     
+                
+            connect_investigator_cards(session)                   
 
 def create_card(json_card, session):
     db_card = Cards()
@@ -45,12 +47,18 @@ def create_card(json_card, session):
         db_investigator = Investigators()
         db_investigator = set_attr(json_card, db_investigator, Investigators, session) 
         
+        # Parse front text
         db_investigator.card_text, db_investigator.elder_sign = json_card['text'].split("\n[elder_sign] effect: ")
-
+        
+        # Parse back text
+        sections = json_card['back_text'].split("<b>")
+        db_investigator.deck_size = sections[1].split("</b>:")[1].strip().split("\n")[0].strip(" .")
+        db_investigator.deckbuilding_options_text = sections[2].split("</b>:")[1].strip().split("\n")[0]
+        db_investigator.deckbuilding_requirements_text = sections[3].split("</b>")[1].strip().replace("(do not count toward deck size):", "").strip()
+        
         # TODO: Create "deckbuilding_options" here
         
         db_card.investigator = db_investigator
-        
         session.add(db_investigator)
     
     elif json_card['type_code'] in ["asset", "event", "skill"]:
@@ -59,13 +67,18 @@ def create_card(json_card, session):
         db_card.player_card = db_player_card
         session.add(db_player_card)
         
+        # Indicate weakness
+        if "subtype_code" in json_card:
+            print("new weakness")
+            db_player_card.is_weakness = True
+        
         if json_card['type_code'] == 'asset':
             print("Creating new asset:", json_card['name'])
             db_asset_card = Assets()
             db_asset_card = set_attr(json_card, db_asset_card, Assets, session)
             db_player_card.asset = db_asset_card
             session.add(db_asset_card)
-            
+                
             if 'text' in json_card:
                 match = re.search("Uses \((\d+) (\w+)\)", json_card['text'])
                 if match:
@@ -98,6 +111,43 @@ def add_uses(type, total_uses, child_asset, session):
     db_uses.assets.append(asset_uses)
     session.add(asset_uses)
         
+def connect_investigator_cards(session):
+    new_investigators = session.scalars(select(Investigators))
+    
+    for investigator in new_investigators:
+        # Search for the player_cards that match our deckbuilding_requirements and establishing a relationship
+        # 1) Split deckbuilding_requirements
+        required_card_names = investigator.deckbuilding_requirements_text.split(",")
+        # 2) For each name
+        for required_card_name in required_card_names:
+            # 3) Find the matching card
+            required_card_name = required_card_name.strip(" .")
+            required_card_subname = None
+            if '(' in required_card_name and ')' in required_card_name:
+                parts = required_card_name.split('(')
+                required_card_name = parts[0].strip()
+                required_card_subname = parts[1].split(')')[0]
+            
+            if not required_card_name == "1 random basic weakness":
+                required_card = find_card(required_card_name, session, required_card_subname)
+            
+                if required_card is not None:
+                    investigator.required_player_cards.append(required_card.player_card)
+                print("Card should be", required_card_name, "card actually is", required_card)
+
+    session.commit()
+
+
+def find_card(card_name, session, subname=None):
+    if subname is not None:
+        target = session.scalars(select(Cards)
+            .where(Cards.name == card_name)
+            .where(Cards.subname == subname)).first()
+    else:
+        target = session.scalars(select(Cards).where(Cards.name == card_name)).first()
+    
+    return target
+
         
 """
 Maps attributes from a JSON object to a database model instance.
@@ -129,9 +179,8 @@ def set_attr(json_card, db_card, table, session):
         if json_attr in json_card and json_attr != "traits":
             setattr(db_card, db_attr, json_card[json_attr])
         
-        if "faction_name" in json_card:
-            db_card.faction = get_faction(faction_name=json_card['faction_name'], session=session)
-            
+    if "faction_name" in json_card:
+        db_card.faction = get_faction(faction_name=json_card['faction_name'], session=session)     
     
     print("New Card:", db_card, " with attributes ", db_attributes)
     return db_card    
@@ -167,6 +216,7 @@ ATTRIBUTE_DB_TO_JSON = {
     'flavor_front' : 'flavor',
     'type' : 'type_code',
     'resource_cost' : 'cost',
+    'card_text_back' : 'back_text'
 }
 
 
