@@ -31,11 +31,14 @@ class Cards(Base):
     id : Mapped[int] = mapped_column(primary_key = True)
     type: Mapped[str] 
     name: Mapped[str]
-    subname: Mapped[Optional[str]]
     cycle: Mapped[str]
     card_pack: Mapped[str]
     collector_number: Mapped[int]
     artist: Mapped[str]
+    
+    # Optional Fields
+    subname: Mapped[Optional[str]]
+    flavor_text: Mapped[Optional[str]]
     
     def __repr__(self):
         # Create a list to hold the core information
@@ -89,8 +92,7 @@ class Investigators(Base):
     deckbuilding_requirements_text: Mapped[str]
     flavor_back: Mapped[str]
     
-    # Optional Fields
-    flavor_front: Mapped[Optional[str]]
+
 
 # Traits only held by player cards
 class Player_Cards(Base):
@@ -128,7 +130,6 @@ class Player_Cards(Base):
     # Optional Fields
     resource_cost: Mapped[Optional[int]]
     text: Mapped[Optional[str]]
-    flavor_text: Mapped[Optional[str]]
 
 class Assets(Base):
     __tablename__ = "assets"

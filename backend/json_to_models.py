@@ -130,10 +130,9 @@ def connect_investigator_cards(session):
             
             if not required_card_name == "1 random basic weakness":
                 required_card = find_card(required_card_name, session, required_card_subname)
-            
+                # Establish a relationship
                 if required_card is not None:
                     investigator.required_player_cards.append(required_card.player_card)
-                print("Card should be", required_card_name, "card actually is", required_card)
 
     session.commit()
 
@@ -213,7 +212,7 @@ ATTRIBUTE_DB_TO_JSON = {
     'combat' : 'skill_combat',
     'agility' : 'skill_agility',
     'flavor_back' : 'back_flavor',
-    'flavor_front' : 'flavor',
+    'flavor_text' : 'flavor',
     'type' : 'type_code',
     'resource_cost' : 'cost',
     'card_text_back' : 'back_text'
