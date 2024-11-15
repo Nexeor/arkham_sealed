@@ -4,7 +4,7 @@ import re
 from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses, Factions
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import NoResultFound
 
 # 1) Read entire set file
 # 2) Iterate through cards one by one
@@ -18,12 +18,12 @@ valid_types = ["investigator", "asset", "event", "skill"]
 
 # Takes a bulk JSON file of a set from ArkhamDB and converts it to the
 # correct models
-def convert_bulk_json(json_file):
+def convert_bulk_json(json_file, debug):
     print("Converting Set:", json_file)
     with open(json_file, 'r') as file:
         # Load the set as a python dict
         set = json.load(file)
-        engine = get_engine(rebuild=True, debug=True)
+        engine = get_engine(rebuild=True, debug=debug)
 
         with Session(engine) as session:
             add_factions(session)
@@ -33,7 +33,7 @@ def convert_bulk_json(json_file):
 
 def create_card(json_card, session):
     db_card = Cards()
-    db_card = set_attr(json_card, db_card, Cards)     
+    db_card = set_attr(json_card, db_card, Cards, session)     
     session.add(db_card)
     
     if "traits" in json_card:
@@ -43,25 +43,27 @@ def create_card(json_card, session):
     
     if json_card['type_code'] == "investigator":
         db_investigator = Investigators()
-        db_investigator = set_attr(json_card, db_investigator, Investigators) 
+        db_investigator = set_attr(json_card, db_investigator, Investigators, session) 
         
         db_investigator.card_text, db_investigator.elder_sign = json_card['text'].split("\n[elder_sign] effect: ")
 
         # TODO: Create "deckbuilding_options" here
         
-        db_card.investigators.append(db_investigator)
+        db_card.investigator = db_investigator
+        
         session.add(db_investigator)
     
     elif json_card['type_code'] in ["asset", "event", "skill"]:
         db_player_card = Player_Cards()
-        db_player_card = set_attr(json_card, db_player_card, Player_Cards)
-        db_card.player_cards.append(db_player_card)
+        db_player_card = set_attr(json_card, db_player_card, Player_Cards, session)
+        db_card.player_card = db_player_card
         session.add(db_player_card)
         
         if json_card['type_code'] == 'asset':
+            print("Creating new asset:", json_card['name'])
             db_asset_card = Assets()
-            db_asset_card = set_attr(json_card, db_asset_card, Assets)
-            db_player_card.assets.append(db_asset_card)
+            db_asset_card = set_attr(json_card, db_asset_card, Assets, session)
+            db_player_card.asset = db_asset_card
             session.add(db_asset_card)
             
             if 'text' in json_card:
@@ -115,7 +117,7 @@ Parameters:
 Returns:
 - db_card (object): The updated database model instance with attributes set.
 """
-def set_attr(json_card, db_card, table):
+def set_attr(json_card, db_card, table, session):
     # Get the table's attributes
     db_attributes = dir(table)
     db_attributes = [attr for attr in db_attributes if attr[0] != "_"]
@@ -126,10 +128,23 @@ def set_attr(json_card, db_card, table):
 
         if json_attr in json_card and json_attr != "traits":
             setattr(db_card, db_attr, json_card[json_attr])
+        
+        if "faction_name" in json_card:
+            db_card.faction = get_faction(faction_name=json_card['faction_name'], session=session)
             
     
-    print("New Card:", db_card)
+    print("New Card:", db_card, " with attributes ", db_attributes)
     return db_card    
+
+def get_faction(session: Session, faction_name: str):
+    try:
+        # Query the Faction table to find a faction with the given name
+        faction = session.query(Factions).filter(Factions.faction_name == faction_name).one()
+        return faction
+    except NoResultFound:
+        # If no matching faction is found, handle the exception as needed
+        print(f"Faction with name '{faction_name}' not found.")
+        return None
 
 def add_factions(session):
     for faction in ["Guardian", "Seeker", "Rogue", "Survivor", "Mystic", "Neutral"]:
@@ -157,4 +172,13 @@ ATTRIBUTE_DB_TO_JSON = {
 
 if __name__ == "__main__":
     filename = sys.argv[1]
-    convert_bulk_json(filename)
+    # If we include any non-zero integer as a debug-flag, run in echo mode
+    debug = False
+    try: 
+        debug_flag = sys.argv[2]
+        if debug_flag:
+            debug = True
+        print("Starting with echo")
+    except: 
+        print("Starting without echo")
+    convert_bulk_json(filename, debug)

@@ -4,7 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column, declarative_base, relationship
 
 Base = declarative_base() 
 
-# Join cards with their traits
+# Many-to-Many between cards and traits 
+# A card can have many traits, and a single trait can be associated with many cards 
 card_traits = Table(
     'card_traits', 
     Base.metadata,
@@ -12,27 +13,16 @@ card_traits = Table(
     Column('trait_id', ForeignKey("traits.id"), primary_key=True)
 )
 
-class Asset_Uses(Base):
-    __tablename__ = "asset_uses"
-    
-    # Relationships
-    uses_id: Mapped[int] = mapped_column(ForeignKey("uses.id"), primary_key=True)
-    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), primary_key=True)
-    
-    use: Mapped["Uses"] = relationship(back_populates="assets")
-    asset: Mapped["Assets"] = relationship(back_populates="uses")
-    
-    num_uses: Mapped[int]
-    
 # Both investigator and player cards share some key traits
 class Cards(Base):
     __tablename__ = "cards"
 
-    # Relationships (Children)
-    investigators: Mapped[List["Investigators"]] = relationship()
-    player_cards: Mapped[List["Player_Cards"]] = relationship()
+    # Children: One to One
+    # Each card is either an investigator card or a player card
+    investigator: Mapped["Investigators"] = relationship(back_populates='card')
+    player_card: Mapped["Player_Cards"] = relationship(back_populates='card')
     
-    # Relationship (Join Table)
+    # Children: Many to Many (join table)
     traits: Mapped[List["Traits"]] = relationship(
         secondary=card_traits, back_populates="cards"
     )
@@ -46,29 +36,24 @@ class Cards(Base):
     collector_number: Mapped[int]
     artist: Mapped[str]
 
-# Used to represent cards traits
-class Traits(Base):
-    __tablename__ = "traits"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    
-    # Relationships (Join table)
-    cards: Mapped[List["Cards"]] = relationship(
-        secondary=card_traits, back_populates="traits"
-    )
-    
-    trait: Mapped[str] # = mapped_column(unique=True)
-
 # Traits only held by investigators
 class Investigators(Base):
     __tablename__ = "investigator_cards"
     id: Mapped[int] = mapped_column(primary_key=True)
     
-    # Relationships (Parents)
+    # Parents: One to One
+    # Each investigator (child) belongs to a card (parent)
     card_id: Mapped[int] = mapped_column(ForeignKey("cards.id"))
+    card: Mapped['Cards'] = relationship(back_populates='investigator')
+    # Each investigator (child) belongs to a faction (parent)
+    faction_id: Mapped[int] = mapped_column(ForeignKey("factions.id"))
+    faction: Mapped['Factions'] = relationship(back_populates='investigators')
 
-    # Relationships (Children)
-    related_cards: Mapped[List['Cards']] = relationship()
+    # Children: One to Many 
+    # Each investigator (parent) can have many deckbuilding options (child)
     deckbuilding_options: Mapped[List['Deckbuilding_Options']] = relationship(back_populates="investigator")
+    # Each investigator (parent) can have many required player_cards (child)
+    required_player_cards: Mapped[List['Player_Cards']] = relationship(back_populates='investigator')
     
     # Mandatory Fields
     nickname: Mapped[str]
@@ -85,46 +70,29 @@ class Investigators(Base):
     # Optional Fields
     flavor_front: Mapped[Optional[str]]
 
-class Deckbuilding_Options(Base):
-    __tablename__ = "deckbuilding_options"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    
-    # Relationships (Parents) 
-    investigator_id: Mapped[int] = mapped_column(ForeignKey('investigator_cards.id'))
-    investigator: Mapped['Investigators'] = relationship(back_populates='deckbuilding_options')
-    
-    # Relationships (Children)
-    faction_id: Mapped[Optional[int]] = mapped_column(ForeignKey("factions.id"))
-    faction: Mapped[Optional['Factions']] = relationship(back_populates='deckbuilding_options')
-    
-    # Mandatory Fields
-    min_xp: Mapped[int]
-    max_xp: Mapped[int]
-    max_num: Mapped[int] 
-    # True if disallowing these cards (ex: no "fortune" cards, mark illegal as true)
-    illegal: Mapped[bool] = mapped_column(default=0) 
-
-class Factions(Base):
-    __tablename__ = "factions"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    
-    # Parents
-    deckbuilding_options: Mapped[List['Deckbuilding_Options']] = relationship(back_populates='faction')
-    
-    # Mandatory Fields
-    faction_name: Mapped[str]
-
 # Traits only held by player cards
 class Player_Cards(Base):
     __tablename__ = "player_cards"
     id: Mapped[int] = mapped_column(primary_key=True)
-
-    # Relationships (Parents)
+    
+    # Parents: One to One
+    # Each player card (child) belongs to a card (parent)
     card_id: Mapped[int] = mapped_column(ForeignKey("cards.id"))
-    investigator_id: Mapped[Optional[int]] = mapped_column(ForeignKey("investigator_cards.id"))
+    card: Mapped['Cards'] = relationship(back_populates='player_card')
 
-    # Relationships (Children)
-    assets: Mapped[List["Assets"]] = relationship()
+    # Parents: One to Many
+    # Any number of player cards (child) may belong to an investigator (parent)
+    investigator_id: Mapped[Optional[int]] = mapped_column(ForeignKey("investigator_cards.id"))
+    investigator: Mapped[Optional['Investigators']] = relationship(back_populates='required_player_cards')
+    # Any number of player cards (child) may belong to a faction (parent)
+    faction_id: Mapped[int] = mapped_column(ForeignKey('factions.id'))    
+    faction: Mapped['Factions'] = relationship(back_populates='player_cards')
+    
+    # TODO: Add secondary join path for secondary faction
+
+    # Children: One to One
+    # Each player card (parent) may contain a single asset (child)
+    asset: Mapped[Optional['Assets']] = relationship(back_populates='player_card')
 
     # Mandatory Traits
     xp_cost: Mapped[int] = mapped_column(default=0)
@@ -144,16 +112,76 @@ class Assets(Base):
     __tablename__ = "assets"
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Parents
-    player_card_id : Mapped[int] = mapped_column(ForeignKey("player_cards.id"))
+    # Parents: One to One
+    # Each asset (child) belongs to a player card (parent)
+    player_card_id: Mapped[int] = mapped_column(ForeignKey("player_cards.id"))
+    player_card: Mapped['Player_Cards'] = relationship(back_populates="asset")
     
     # Associations
-    uses: Mapped[List[Asset_Uses]] = relationship(back_populates="asset")
+    uses: Mapped[List['Asset_Uses']] = relationship(back_populates="asset")
     
     # Optional Fields
     slot: Mapped[Optional[str]]
     health: Mapped[Optional[int]]
     sanity: Mapped[Optional[int]] 
+
+class Asset_Uses(Base):
+    __tablename__ = "asset_uses"
+    
+    # Relationships
+    uses_id: Mapped[int] = mapped_column(ForeignKey("uses.id"), primary_key=True)
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"), primary_key=True)
+    
+    use: Mapped["Uses"] = relationship(back_populates="assets")
+    asset: Mapped['Assets'] = relationship(back_populates="uses")
+    
+    num_uses: Mapped[int]
+
+# Used to represent cards traits
+class Traits(Base):
+    __tablename__ = "traits"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    
+    # Relationships (Join table)
+    cards: Mapped[List["Cards"]] = relationship(
+        secondary=card_traits, back_populates="traits"
+    )
+    
+    trait: Mapped[str] # = mapped_column(unique=True)
+
+class Deckbuilding_Options(Base):
+    __tablename__ = "deckbuilding_options"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    
+    # Parents: One to Many
+    # Any number of deckbuilding options (child) can belong to one investigator (parnet)
+    investigator_id: Mapped[int] = mapped_column(ForeignKey('investigator_cards.id'))
+    investigator: Mapped['Investigators'] = relationship(back_populates='deckbuilding_options')
+    
+    # Parents: One to One
+    # A deckbuilding option (child) can belong to one faction
+    faction_id: Mapped[Optional[int]] = mapped_column(ForeignKey("factions.id"))
+    faction: Mapped[Optional['Factions']] = relationship(back_populates='deckbuilding_options')
+    
+    # Mandatory Fields
+    min_xp: Mapped[int]
+    max_xp: Mapped[int]
+    max_num: Mapped[int] 
+    # True if disallowing these cards (ex: no "fortune" cards, mark illegal as true)
+    illegal: Mapped[bool] = mapped_column(default=0) 
+
+class Factions(Base):
+    __tablename__ = "factions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+     
+    # Children: One to Many
+    # Each Faction (parent) may have any number of player/investigator/deckbuilding (child)
+    player_cards: Mapped[List['Player_Cards']] = relationship(back_populates='faction')
+    investigators: Mapped[List['Investigators']] = relationship(back_populates='faction')
+    deckbuilding_options: Mapped[List['Deckbuilding_Options']] = relationship(back_populates='faction')
+
+    # Mandatory Fields
+    faction_name: Mapped[str]
 
 class Uses(Base):
     __tablename__ = "uses"
