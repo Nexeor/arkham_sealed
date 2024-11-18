@@ -189,9 +189,12 @@ class Deckbuilding_Options(Base):
     # Mandatory Fields
     min_xp: Mapped[int]
     max_xp: Mapped[int]
-    max_num: Mapped[int] 
     # True if disallowing these cards (ex: no "fortune" cards, mark illegal as true)
     illegal: Mapped[bool] = mapped_column(default=0) 
+
+    # Optional Fields
+    max_num: Mapped[Optional[int]] 
+
 
 class Factions(Base):
     __tablename__ = "factions"

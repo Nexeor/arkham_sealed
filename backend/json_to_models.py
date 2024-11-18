@@ -1,7 +1,7 @@
 import json 
 import sys
 import re
-from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses, Factions
+from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses, Factions, Deckbuilding_Options
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
@@ -31,7 +31,7 @@ def convert_bulk_json(json_file, debug):
                 if card['type_code'] in valid_types:
                     create_card(card, session)     
                 
-            connect_investigator_cards(session)                   
+            connect_investigator_cards(session)   
 
 def create_card(json_card, session):
     db_card = Cards()
@@ -80,7 +80,7 @@ def create_card(json_card, session):
             session.add(db_asset_card)
                 
             if 'text' in json_card:
-                match = re.search("Uses \((\d+) (\w+)\)", json_card['text'])
+                match = re.search(r"Uses \((\d+) (\w+)\)", json_card['text'])
                 if match:
                     add_uses(match.group(2), int(match.group(1)), db_asset_card, session)
     
@@ -134,6 +134,26 @@ def connect_investigator_cards(session):
                 if required_card is not None:
                     investigator.required_player_cards.append(required_card.player_card)
 
+        deckbuilding_options = investigator.deckbuilding_options_text.split(", ")
+        for deckbuilding_option in deckbuilding_options:    
+            db_deckbuilding_option = Deckbuilding_Options()  
+            # Get the card group
+            print(deckbuilding_option)      
+            group_search = re.search(r'\[(.*?)\]', deckbuilding_option)
+            if group_search:
+                group = group_search.group(1)
+                print(group)
+
+            # Get the min/max XP
+            xp_search = re.search(r'level\s*(\d+)-(\d+)', deckbuilding_option)
+            if xp_search:
+                db_deckbuilding_option.min_xp = xp_search.group(1)
+                db_deckbuilding_option.max_xp = xp_search.group(2)
+                print(db_deckbuilding_option.min_xp)
+                print(db_deckbuilding_option.max_xp)
+
+                
+        
     session.commit()
 
 
