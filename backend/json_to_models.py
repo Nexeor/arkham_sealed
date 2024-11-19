@@ -139,13 +139,22 @@ def connect_investigator_cards(session):
             db_deckbuilding_option = Deckbuilding_Options()  
             # Get the 'group' of cards (faction, trait, or uses)
             group_search = re.search(r'\[(.*?)\]|Neutral', deckbuilding_option)
-            if group_search:
+            if group_search:                
                 group = group_search.group(1) if group_search.group(1) else group_search.group().lower()
-                faction = session.scalars(
-                    select(Factions)
-                    .where(Factions.faction_name == group)).first()
-                if faction:
-                    db_deckbuilding_option.faction = faction            
+
+                faction_search = session.scalars(select(Factions).where(Factions.faction_name == group)).first()
+                if faction_search:
+                    db_deckbuilding_option.faction = faction_search
+
+                ''' 
+                trait_search = session.scalars(select(Traits).where(Traits.trait == group)).first()
+                if trait_search:
+                    db_deckbuilding_option.trait = trait_search
+                
+                use_search = session.scalars(select(Uses).where(Uses.type == group)).first()
+                if use_search:
+                    db_deckbuilding_option.uses = trait_search
+                '''
 
             # Get the min/max XP
             xp_search = re.search(r'level\s*(\d+)-(\d+)', deckbuilding_option)

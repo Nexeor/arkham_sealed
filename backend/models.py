@@ -170,6 +170,10 @@ class Traits(Base):
         secondary=card_traits, back_populates="traits"
     )
     
+    # Children: One to Many 
+    # Each trait (parent) can have many deckbuilding options (child)
+    deckbuilding_options: Mapped[List['Deckbuilding_Options']] = relationship(back_populates="trait")
+    
     trait: Mapped[str] # = mapped_column(unique=True)
 
 class Deckbuilding_Options(Base):
@@ -180,11 +184,15 @@ class Deckbuilding_Options(Base):
     # Any number of deckbuilding options (child) can belong to one investigator (parnet)
     investigator_id: Mapped[int] = mapped_column(ForeignKey('investigator_cards.id'))
     investigator: Mapped['Investigators'] = relationship(back_populates='deckbuilding_options')
-    
-    # Parents: One to One
-    # A deckbuilding option (child) can belong to one faction
+    # Any number of deckbuilding options (child) can belong to one faction
     faction_id: Mapped[Optional[int]] = mapped_column(ForeignKey("factions.id"))
     faction: Mapped[Optional['Factions']] = relationship(back_populates='deckbuilding_options')
+    # Any number of deckbuilding options (child) can belong to one trait
+    trait_id: Mapped[Optional[int]] = mapped_column(ForeignKey("traits.id"))
+    trait: Mapped[Optional['Traits']] = relationship(back_populates='deckbuilding_options')
+    # Any number of deckbuilding options (child) can belong to one use type
+    uses_id: Mapped[Optional[int]] = mapped_column(ForeignKey("uses.id"))
+    uses: Mapped[Optional['Uses']] = relationship(back_populates='deckbuilding_options')
     
     # Mandatory Fields
     min_xp: Mapped[int]
@@ -215,6 +223,10 @@ class Uses(Base):
     
     # Associations
     assets: Mapped[List[Asset_Uses]] = relationship(back_populates="use")
+    
+    # Children: One to Many 
+    # Each investigator (parent) can have many deckbuilding options (child)
+    deckbuilding_options: Mapped[List['Deckbuilding_Options']] = relationship(back_populates="uses")
     
     # Mandatory fields
     type: Mapped[str]
