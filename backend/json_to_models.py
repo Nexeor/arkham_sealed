@@ -137,23 +137,25 @@ def connect_investigator_cards(session):
         deckbuilding_options = investigator.deckbuilding_options_text.split(", ")
         for deckbuilding_option in deckbuilding_options:    
             db_deckbuilding_option = Deckbuilding_Options()  
-            # Get the card group
-            print(deckbuilding_option)      
-            group_search = re.search(r'\[(.*?)\]', deckbuilding_option)
+            # Get the 'group' of cards (faction, trait, or uses)
+            group_search = re.search(r'\[(.*?)\]|Neutral', deckbuilding_option)
             if group_search:
-                group = group_search.group(1)
-                print(group)
+                group = group_search.group(1) if group_search.group(1) else group_search.group().lower()
+                faction = session.scalars(
+                    select(Factions)
+                    .where(Factions.faction_name == group)).first()
+                if faction:
+                    db_deckbuilding_option.faction = faction            
 
             # Get the min/max XP
             xp_search = re.search(r'level\s*(\d+)-(\d+)', deckbuilding_option)
             if xp_search:
-                db_deckbuilding_option.min_xp = xp_search.group(1)
-                db_deckbuilding_option.max_xp = xp_search.group(2)
-                print(db_deckbuilding_option.min_xp)
-                print(db_deckbuilding_option.max_xp)
+                db_deckbuilding_option.min_xp, db_deckbuilding_option.max_xp = xp_search.group(1), xp_search.group(2)
+            
+            # Make connections
+            db_deckbuilding_option.investigator = investigator
+            session.add(db_deckbuilding_option)
 
-                
-        
     session.commit()
 
 
@@ -198,8 +200,8 @@ def set_attr(json_card, db_card, table, session):
         if json_attr in json_card and json_attr != "traits":
             setattr(db_card, db_attr, json_card[json_attr])
         
-    if "faction_name" in json_card:
-        db_card.faction = get_faction(faction_name=json_card['faction_name'], session=session)     
+    if "faction_code" in json_card:
+        db_card.faction = get_faction(faction_name=json_card['faction_code'], session=session)     
     
     print("New Card:", db_card, " with attributes ", db_attributes)
     return db_card    
@@ -215,7 +217,7 @@ def get_faction(session: Session, faction_name: str):
         return None
 
 def add_factions(session):
-    for faction in ["Guardian", "Seeker", "Rogue", "Survivor", "Mystic", "Neutral"]:
+    for faction in ["guardian", "seeker", "rogue", "survivor", "mystic", "neutral"]:
         new_faction = Factions(faction_name=faction)
         session.add(new_faction)
     
