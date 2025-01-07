@@ -18,9 +18,10 @@ class Cards(Base):
     __tablename__ = "cards"
 
     # Children: One to One
-    # Each card is either an investigator card or a player card
-    investigator: Mapped["Investigators"] = relationship(back_populates='card')
-    player_card: Mapped["Player_Cards"] = relationship(back_populates='card')
+    # Each card is either an investigator card, player card, or treachery card
+    investigator: Mapped['Investigators'] = relationship(back_populates='card')
+    player_card: Mapped['Player_Cards'] = relationship(back_populates='card')
+    treachery: Mapped['Treacheries'] = relationship(back_populates="card")
     
     # Children: Many to Many (join table)
     traits: Mapped[List["Traits"]] = relationship(
@@ -76,6 +77,10 @@ class Investigators(Base):
     # Each investigator (parent) can have many required player_cards (child)
     required_player_cards: Mapped[List['Player_Cards']] = relationship(back_populates='investigator')
     
+    # Children: One to One
+    # Each investigator has a special weakness card
+    weakness: Mapped['Treacheries'] = relationship(back_populates="investigator")
+    
     # Mandatory Fields
     nickname: Mapped[str]
     card_text: Mapped[str]
@@ -130,6 +135,22 @@ class Player_Cards(Base):
     # Optional Fields
     resource_cost: Mapped[Optional[int]]
     text: Mapped[Optional[str]]
+
+class Treacheries(Base):
+    __tablename__ = "treacheries"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    
+    # Parents: One to One
+    # Each treachery (child) belongs to a single player card (parent)
+    card_id: Mapped[int] = mapped_column(ForeignKey("cards.id"))
+    card: Mapped['Cards'] = relationship(back_populates="treachery")
+    # Each treachery (child) may belong to an investigator (parent)
+    investigator_id: Mapped[Optional[int]] = mapped_column(ForeignKey("investigator_cards.id"))
+    investigator: Mapped[Optional['Investigators']] = relationship(back_populates="weakness")
+    
+    # Mandatory Fields
+    encounter_set: Mapped[str]
+    card_text: Mapped[str]
 
 class Assets(Base):
     __tablename__ = "assets"
