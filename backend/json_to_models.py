@@ -1,7 +1,7 @@
 import json 
 import sys
 import re
-from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses, Factions, Deckbuilding_Options
+from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses, Factions, Deckbuilding_Options, Treacheries
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
@@ -14,7 +14,7 @@ from sqlalchemy.exc import NoResultFound
 # 5) Then detect if player or investigator card and fill out corresponding entry
 # 6) Add relevant deckbuilding options, card traits, factions, uses, symbols, etc.
 
-valid_types = ["investigator", "asset", "event", "skill"]
+valid_types = ["investigator", "asset", "event", "skill", "treachery"]
 
 # Takes a bulk JSON file of a set from ArkhamDB and converts it to the
 # correct models
@@ -68,8 +68,8 @@ def create_card(json_card, session):
         session.add(db_player_card)
         
         # Indicate weakness
-        if "subtype_code" in json_card:
-            print("new weakness")
+        if "subtype_code" in json_card and json_card['subtype_code'] == "weakness":
+            print("New weakness")
             db_player_card.is_weakness = True
         
         if json_card['type_code'] == 'asset':
@@ -83,6 +83,17 @@ def create_card(json_card, session):
                 match = re.search(r"Uses \((\d+) (\w+)\)", json_card['text'])
                 if match:
                     add_uses(match.group(2), int(match.group(1)), db_asset_card, session)
+    
+    elif json_card['type_code'] == 'treachery':
+        print(f"Creating new treachery: {json_card['name']}")
+        db_treachery = Treacheries()
+        db_treachery = set_attr(json_card, db_treachery, Treacheries, session)
+        
+        if "subtype_code" in json_card and json_card['subtype_code'] in ["weakness", "basicweakness"]:
+            db_treachery.encounter_set = "investigator weakness"
+            
+        db_treachery.card = db_card
+        session.add(db_treachery)
     
     session.commit()
 
@@ -226,7 +237,7 @@ def get_faction(session: Session, faction_name: str):
         return None
 
 def add_factions(session):
-    for faction in ["guardian", "seeker", "rogue", "survivor", "mystic", "neutral"]:
+    for faction in ["guardian", "seeker", "rogue", "survivor", "mystic", "neutral", "mythos"]:
         new_faction = Factions(faction_name=faction)
         session.add(new_faction)
     
@@ -246,7 +257,9 @@ ATTRIBUTE_DB_TO_JSON = {
     'flavor_text' : 'flavor',
     'type' : 'type_code',
     'resource_cost' : 'cost',
-    'card_text_back' : 'back_text'
+    'card_text' : 'text',
+    'card_text_back' : 'back_text',
+    'encounter_set' : 'encounter_name'
 }
 
 
