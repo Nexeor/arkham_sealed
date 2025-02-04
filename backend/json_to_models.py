@@ -1,7 +1,7 @@
 import json 
 import sys
 import re
-from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses, Factions, Deckbuilding_Options, Treacheries
+from models import get_engine, Cards, Investigators, Player_Cards, Assets, Traits, Uses, Asset_Uses, Factions, Deckbuilding_Options, Treacheries, Cycle
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoResultFound
@@ -27,6 +27,7 @@ def convert_bulk_json(json_file, debug):
 
         with Session(engine) as session:
             add_factions(session)
+            add_cycles(session)
             for card in set:
                 if card['type_code'] in valid_types:
                     create_card(card, session)     
@@ -223,6 +224,9 @@ def set_attr(json_card, db_card, table, session):
     if "faction_code" in json_card:
         db_card.faction = get_faction(faction_name=json_card['faction_code'], session=session)     
     
+    if "pack_code" in json_card:
+        db_card.cycle = get_cycle(cycle_code=json_card['pack_code'], session=session)
+    
     print("New Card:", db_card, " with attributes ", db_attributes)
     return db_card    
 
@@ -236,15 +240,32 @@ def get_faction(session: Session, faction_name: str):
         print(f"Faction with name '{faction_name}' not found.")
         return None
 
+def get_cycle(session: Session, cycle_code: str):
+    try: 
+        cycle = session.query(Cycle).filter(Cycle.code == cycle_code).one()
+        return cycle
+    except NoResultFound:
+        # If no matching faction is found, handle the exception as needed
+        print(f"Cycle with code '{cycle_code}' not found.")
+        return None
+
 def add_factions(session):
     for faction in ["guardian", "seeker", "rogue", "survivor", "mystic", "neutral", "mythos"]:
-        new_faction = Factions(faction_name=faction)
+        new_faction = Factions(faction_name = faction)
         session.add(new_faction)
     
     session.commit()
 
+def add_cycles(session):
+    with open("cycles.json") as file:
+        data = json.load(file)
+        for cycle in data:
+            new_cycle = Cycle( code = cycle['code'], name = cycle['name'])
+            session.add(new_cycle)
+    
+    session.commit()
+
 ATTRIBUTE_DB_TO_JSON = {
-    'cycle' : 'pack_name',
     'card_pack' : 'pack_name',
     'collector_number' : 'position',
     'artist' : 'illustrator',

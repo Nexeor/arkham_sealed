@@ -1,0 +1,63 @@
+[
+    {
+        "code": "core",
+        "name": "Core Set",
+        "mythos_packs": []
+    },
+    {
+        "code": "dwl",
+        "name": "The Dunwich Legacy",
+        "mythos_packs": [{ "code": "dwl", "name": "The Dunwich Legacy"},
+                        { "code": "mkm", "name": "The Miskatonic Museum"},
+                        { "code": "esx", "name": "The Essex Count Express"},
+                        { "code": "boa", "name": "Blood on the Altar"},
+                        { "code": "unu", "name": "Undimensioned and Unseen"},
+                        { "code": "wda", "name": "Where Doom Awaits"},
+                        { "code": "lts", "name": "Lost in Time and Space"}]
+    },
+    {
+        "code": "ptc",
+        "name": "The Path to Carcosa",
+        "mythos_packs": []
+    },
+    {
+        "code": "tfa",
+        "name": "The Forgotten Age",
+        "mythos_packs": []
+    },
+    {
+        "code": "tcu",
+        "name": "The Circle Undone",
+        "mythos_packs": []
+    },
+    {
+        "code": "dea",
+        "name": "The Dream Eaters",
+        "mythos_packs": []
+    },
+    {
+        "code": "inc",
+        "name": "The Innsmouth Conspiracy",
+        "mythos_packs": []
+    },
+    {
+        "code": "ede",
+        "name": "Edge of the Earth",
+        "mythos_packs": []
+    },
+    {
+        "code": "sck",
+        "name": "The Scarlet Keys",
+        "mythos_packs": []
+    },
+    {
+        "code": "fhv",
+        "name": "The Feast of Hemlock Vale",
+        "mythos_packs": []
+    },
+    {
+        "code": "drc",
+        "name": "The Drowned City",
+        "mythos_packs": []
+    }
+]

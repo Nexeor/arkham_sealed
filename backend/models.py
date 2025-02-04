@@ -4,6 +4,18 @@ from sqlalchemy.orm import Mapped, mapped_column, declarative_base, relationship
 
 Base = declarative_base() 
 
+class Cycle(Base):
+    __tablename__ = "cycle"
+    id: Mapped[int] = mapped_column(primary_key = True)
+    
+    # Children: One to many
+    # Each cycle (parent) has many cards (child)
+    cycle_cards: Mapped[List['Cards']] = relationship(back_populates="cycle")
+    
+    # Traits
+    code: Mapped[str]
+    name: Mapped[str]
+
 # Many-to-Many between cards and traits 
 # A card can have many traits, and a single trait can be associated with many cards 
 card_traits = Table(
@@ -27,12 +39,16 @@ class Cards(Base):
     traits: Mapped[List["Traits"]] = relationship(
         secondary=card_traits, back_populates="cards"
     )
+    
+    # Parents: Many to One
+    # Any number of cards (child) can belong to a single set (parent)
+    cycle_id: Mapped[int] = mapped_column(ForeignKey('cycle.id'))
+    cycle: Mapped['Cycle'] = relationship(back_populates='cycle_cards')
 
     # Traits
     id : Mapped[int] = mapped_column(primary_key = True)
     type: Mapped[str] 
     name: Mapped[str]
-    cycle: Mapped[str]
     card_pack: Mapped[str]
     collector_number: Mapped[int]
     artist: Mapped[str]
@@ -202,7 +218,7 @@ class Deckbuilding_Options(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     
     # Parents: One to Many
-    # Any number of deckbuilding options (child) can belong to one investigator (parnet)
+    # Any number of deckbuilding options (child) can belong to one investigator (parent)
     investigator_id: Mapped[int] = mapped_column(ForeignKey('investigator_cards.id'))
     investigator: Mapped['Investigators'] = relationship(back_populates='deckbuilding_options')
     # Any number of deckbuilding options (child) can belong to one faction
