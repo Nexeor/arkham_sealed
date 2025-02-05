@@ -15,6 +15,16 @@ class Cycle(Base):
     # Traits
     code: Mapped[str]
     name: Mapped[str]
+    
+    def __repr__(self):
+        # Create a list to hold the core information
+        cycle_info = [
+            f"Code: {self.code}",
+            f"Name: '{self.name}'",
+        ]
+        
+        # Join all the information together
+        return f"Cycle({', '.join(cycle_info)})"
 
 # Many-to-Many between cards and traits 
 # A card can have many traits, and a single trait can be associated with many cards 
