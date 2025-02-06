@@ -1,9 +1,6 @@
 backend/example.db
-backend/example.db
-backend/example.db
 backend/investigators.txt
 backend/__pycache__/models.cpython-311.pyc
-backend/example.db
 backend/test.py
 backend/__pycache__/db.cpython-313.pyc
 backend/__pycache__/main.cpython-313.pyc
