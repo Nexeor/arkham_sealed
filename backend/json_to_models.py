@@ -280,7 +280,8 @@ ATTRIBUTE_DB_TO_JSON = {
     'resource_cost' : 'cost',
     'card_text' : 'text',
     'card_text_back' : 'back_text',
-    'encounter_set' : 'encounter_name'
+    'encounter_set' : 'encounter_name',
+    'image_url' : 'imagesrc'
 }
 
 

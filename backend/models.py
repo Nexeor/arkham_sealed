@@ -62,6 +62,7 @@ class Cards(Base):
     card_pack: Mapped[str]
     collector_number: Mapped[int]
     artist: Mapped[str]
+    image_url: Mapped[str]
     
     # Optional Fields
     subname: Mapped[Optional[str]]
