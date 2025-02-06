@@ -1,5 +1,6 @@
 from flask import Flask, request 
 from flask_restful import Api, Resource, abort, marshal_with, reqparse, fields
+from flask_cors import CORS
 from sqlalchemy import select
 from models import Cycle, Cards
 from db import SessionLocal
@@ -7,6 +8,7 @@ from db import SessionLocal
 app = Flask(__name__)
 api = Api(app)
 db = SessionLocal()
+CORS(app)
 
 cycle_fields = {
     'code' : fields.String,
@@ -39,13 +41,16 @@ class CycleListResource(Resource):
     
 class CardResource(Resource):
     @marshal_with(card_fields)
-    def get(self, card_id):
-        return db.scalars((select(Cards).where(Cards.id == card_id))).one()
+    def get(self):
+        card_id = request.args.get('id')
+        if card_id:
+            return db.scalars((select(Cards).where(Cards.id == card_id))).one()
+        return db.scalars((select(Cards).where(Cards.id == 1))).one()
 		
 
 api.add_resource(CycleResource, "/cycle/<string:set_code>")
 api.add_resource(CycleListResource, "/cycle-list/")
-api.add_resource(CardResource, "/card/<int:card_id>")
+api.add_resource(CardResource, "/card/")
 
 if __name__ == "__main__":
     app.run(debug=True)
