@@ -1,9 +1,5 @@
+import { CardQuery } from "../App";
 import useData from "./useData"
-
-export interface CardQuery {
-    id: number;
-    name: string;
-}
 
 export interface Card {
     id: number;

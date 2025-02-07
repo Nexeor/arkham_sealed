@@ -1,26 +1,23 @@
-import useCards, { CardQuery } from "../hooks/useCards";
+import { CardQuery } from "../App";
+import useCycleCards from "../hooks/useCycleCards";
 
 interface Props {
   cardQuery: CardQuery;
 }
 
 const MainPanel = ({ cardQuery }: Props) => {
-  const { data, error } = useCards(cardQuery);
+  const BASE = "https://arkhamdb.com/";
+  const { data, error, isLoading } = useCycleCards(cardQuery);
 
-  console.log(data);
+  console.log("data:", data);
 
   if (error) return <h1>{error}</h1>;
 
   return (
     <div className="container d-flex flex-wrap">
-      <img src={"https://arkhamdb.com/bundles/cards/01016.png"}></img>
-      <img src={"https://arkhamdb.com/bundles/cards/01016.png"}></img>
-      <img src={"https://arkhamdb.com/bundles/cards/01016.png"}></img>
-      <img src={"https://arkhamdb.com/bundles/cards/01016.png"}></img>
-      <img src={"https://arkhamdb.com/bundles/cards/01016.png"}></img>
-      <img src={"https://arkhamdb.com/bundles/cards/01016.png"}></img>
-      <img src={"https://arkhamdb.com/bundles/cards/01016.png"}></img>
-      <img src={"https://arkhamdb.com/bundles/cards/01016.png"}></img>
+      {data.map((card) => (
+        <img src={BASE + card.image_url}></img>
+      ))}
     </div>
   );
 };

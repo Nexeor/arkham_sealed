@@ -20,14 +20,19 @@ cycle_list_fields = {
 }
 
 card_fields = {
+    'name' : fields.String,
     'image_url' : fields.String
+}
+
+card_list_fields = {
+    'cards' : fields.List(fields.Nested(card_fields))
 }
 
 class CycleResource(Resource):
     @marshal_with(cycle_fields)
-    def get(self, set_code = None):
+    def get(self, cycle_code = None):
         # Return specific cycle
-        targetCycle = db.scalars((select(Cycle).where(Cycle.code == set_code))).one()
+        targetCycle = db.scalars((select(Cycle).where(Cycle.code == cycle_code))).one()
         if targetCycle is None:
             abort(404, "Requested cycle not found")
         return targetCycle  
@@ -46,11 +51,32 @@ class CardResource(Resource):
         if card_id:
             return db.scalars((select(Cards).where(Cards.id == card_id))).one()
         return db.scalars((select(Cards).where(Cards.id == 1))).one()
+    
+class CardsResource(Resource):
+    @marshal_with(card_list_fields)
+    def get(self):
+        cycle_code = request.args.get('cycle_code')
+        # If cycle_code provided, fetch the cycle then the cards
+        if cycle_code:
+            cycle = db.scalars(select(Cycle).where(Cycle.code == cycle_code)).one_or_none()
+            if not cycle:
+                abort(404, message=f"Cycle with code {cycle_code} not found")
+            
+            return  db.scalars(select(Cards).where(Cards.cycle == cycle)).all()
+        
+        cycle = db.scalars(select(Cycle).where(Cycle.code == "core")).one()
+        print(cycle)
+        cards = db.scalars((select(Cards).where(Cards.cycle == cycle))).all()
+        print(cards)
+
+        # Otherwise return core set
+        return { "cards" : db.scalars((select(Cards).where(Cards.cycle == cycle))).all()}
 		
 
-api.add_resource(CycleResource, "/cycle/<string:set_code>")
+api.add_resource(CycleResource, "/cycle/<string:cycle_code>")
 api.add_resource(CycleListResource, "/cycle-list/")
 api.add_resource(CardResource, "/card/")
+api.add_resource(CardsResource, "/cards/cycle/"), 
 
 if __name__ == "__main__":
     app.run(debug=True)

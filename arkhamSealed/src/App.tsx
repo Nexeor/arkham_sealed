@@ -3,7 +3,11 @@ import Header from "./components/Header";
 import MainPanel from "./components/MainPanel";
 import SetList from "./components/SetList";
 
-import { CardQuery } from "./hooks/useCards";
+export interface CardQuery {
+  id: number;
+  name: string;
+  cycle: string;
+}
 
 function App() {
   const [cardQuery, setCardQuery] = useState<CardQuery>({} as CardQuery);
