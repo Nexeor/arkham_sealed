@@ -21,6 +21,7 @@ cycle_list_fields = {
 
 card_fields = {
     'name' : fields.String,
+    'type' : fields.String,
     'image_url' : fields.String
 }
 
@@ -71,7 +72,6 @@ class CardsResource(Resource):
 
         # Otherwise return core set
         return { "cards" : db.scalars((select(Cards).where(Cards.cycle == cycle))).all()}
-		
 
 api.add_resource(CycleResource, "/cycle/<string:cycle_code>")
 api.add_resource(CycleListResource, "/cycle-list/")

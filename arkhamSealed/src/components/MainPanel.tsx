@@ -14,11 +14,22 @@ const MainPanel = ({ cardQuery }: Props) => {
   if (error) return <h1>{error}</h1>;
 
   return (
-    <div className="container d-flex flex-wrap">
-      {data.map((card) => (
-        <img src={BASE + card.image_url}></img>
-      ))}
-    </div>
+    <>
+      <div className="container d-flex flex-wrap">
+        {data
+          .filter((card) => card.type === "investigator")
+          .map((card) => (
+            <img src={BASE + card.image_url}></img>
+          ))}
+      </div>
+      <div className="container d-flex flex-wrap">
+        {data
+          .filter((card) => card.type !== "investigator")
+          .map((card) => (
+            <img src={BASE + card.image_url}></img>
+          ))}
+      </div>
+    </>
   );
 };
 

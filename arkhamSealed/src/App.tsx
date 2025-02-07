@@ -7,6 +7,7 @@ export interface CardQuery {
   id: number;
   name: string;
   cycle: string;
+  type: string;
 }
 
 function App() {
