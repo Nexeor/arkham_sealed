@@ -22,12 +22,21 @@ cycle_list_fields = {
 card_fields = {
     'name' : fields.String,
     'type' : fields.String,
-    'image_url' : fields.String
+    'image_url' : fields.String,
+    'faction': fields.String(attribute=lambda card: get_card_faction(card))
 }
 
 card_list_fields = {
     'cards' : fields.List(fields.Nested(card_fields))
 }
+
+def get_card_faction(card):
+    """Retrieve the faction name for a given card."""
+    if card.investigator:
+        return card.investigator.faction.faction_name
+    elif card.player_card:
+        return card.player_card.faction.faction_name
+    return "Neutral"
 
 class CycleResource(Resource):
     @marshal_with(cycle_fields)
@@ -63,7 +72,7 @@ class CardsResource(Resource):
             if not cycle:
                 abort(404, message=f"Cycle with code {cycle_code} not found")
             
-            return  db.scalars(select(Cards).where(Cards.cycle == cycle)).all()
+            return {"cards" : db.scalars(select(Cards).where(Cards.cycle == cycle)).all()}
         
         cycle = db.scalars(select(Cycle).where(Cycle.code == "core")).one()
         print(cycle)
@@ -71,7 +80,7 @@ class CardsResource(Resource):
         print(cards)
 
         # Otherwise return core set
-        return { "cards" : db.scalars((select(Cards).where(Cards.cycle == cycle))).all()}
+        return { "cards" : cards}
 
 api.add_resource(CycleResource, "/cycle/<string:cycle_code>")
 api.add_resource(CycleListResource, "/cycle-list/")

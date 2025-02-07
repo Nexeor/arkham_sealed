@@ -6,6 +6,7 @@ export interface Card {
     id: number;
     name: string;
     image_url: string;
+    faction: string;
 }
 
 const useCards = (cardQuery : CardQuery) => useData<Card>('./card/', {

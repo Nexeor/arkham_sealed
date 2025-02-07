@@ -8,6 +8,7 @@ export interface CardQuery {
   name: string;
   cycle: string;
   type: string;
+  faction: string;
 }
 
 function App() {
