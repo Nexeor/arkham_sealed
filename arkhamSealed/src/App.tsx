@@ -21,11 +21,11 @@ function App() {
           <Header />
         </div>
       </div>
-      <div className="row">
-        <div className="col-1 bg-primary">
+      <div className="row flex-grow-1">
+        <div className="col-2 bg-primary p-0 m-0 ">
           <SetList />
         </div>
-        <div className="col bg-secondary">
+        <div className="col col-10 bg-secondary">
           <MainPanel cardQuery={cardQuery}></MainPanel>
         </div>
       </div>

@@ -13,10 +13,11 @@ const SetList = () => {
     "Drowned City",
   ];
   return (
-    <div className="btn-group-vertical">
+    <div className="btn-group-vertical text-white bg-primary w-100">
+      <h4 className="text-center m-2">Browse by Set:</h4>
       {setList.map((set) => {
         return (
-          <button className="btn btn-primary" key={set}>
+          <button className="btn btn-primary w-100 text-start" key={set}>
             {set}
           </button>
         );
