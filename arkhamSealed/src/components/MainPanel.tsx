@@ -1,40 +1,45 @@
-import { useState } from "react";
 import { CardQuery } from "../App";
 import useCycleCards from "../hooks/useCycleCards";
-import ClassSelector from "./ClassSelector";
 
 interface Props {
   cardQuery: CardQuery;
+  selectedType: string;
 }
 
-const MainPanel = ({ cardQuery }: Props) => {
+type cardType = {
+  [key: string]: string[];
+};
+
+const typeMap: cardType = {
+  Investigator: ["investigator"],
+  "Player Cards": ["asset", "skill", "event"],
+  Mythos: ["treachery"],
+};
+
+const MainPanel = ({ cardQuery, selectedType }: Props) => {
   const BASE = "https://arkhamdb.com/";
   const { data, error } = useCycleCards(cardQuery);
-  const [selectedFaction, setSelectedFaction] = useState("");
+  // const [selectedFaction, setSelectedFaction] = useState("");
 
-  console.log("data:", data);
-  console.log(selectedFaction);
   if (error) return <h1>{error}</h1>;
+
+  const filteredData =
+    selectedType !== "All"
+      ? data.filter((card) => typeMap[selectedType]?.includes(card.type))
+      : data;
 
   return (
     <>
-      <ClassSelector onSelect={setSelectedFaction} />
       <div className="container d-flex flex-wrap">
-        {data
+        {filteredData
           .filter((card) => card.type === "investigator")
-          .filter(
-            (card) => selectedFaction === "" || card.faction === selectedFaction
-          )
           .map((card) => (
             <img src={BASE + card.image_url}></img>
           ))}
       </div>
       <div className="container d-flex flex-wrap">
-        {data
+        {filteredData
           .filter((card) => card.type !== "investigator")
-          .filter(
-            (card) => selectedFaction === "" || card.faction === selectedFaction
-          )
           .map((card) => (
             <img src={BASE + card.image_url}></img>
           ))}

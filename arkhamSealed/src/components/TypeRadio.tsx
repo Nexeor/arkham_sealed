@@ -4,7 +4,7 @@ interface Props {
 }
 
 const TypeRadio = ({ setSelected, selected }: Props) => {
-  const labels = ["All", "Investigators", "Player Cards", "Mythos"];
+  const labels = ["All", "Investigator", "Player Cards", "Mythos"];
 
   return (
     <div className="btn-group">

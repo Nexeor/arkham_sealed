@@ -27,7 +27,10 @@ function App() {
           <SetList />
         </div>
         <div className="col col-10 bg-secondary">
-          <MainPanel cardQuery={cardQuery}></MainPanel>
+          <MainPanel
+            cardQuery={cardQuery}
+            selectedType={selectedType}
+          ></MainPanel>
         </div>
       </div>
       <div className="row bg-dark">Footer</div>
