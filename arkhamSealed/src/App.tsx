@@ -13,12 +13,13 @@ export interface CardQuery {
 
 function App() {
   const [cardQuery, setCardQuery] = useState<CardQuery>({} as CardQuery);
+  const [selectedType, setSelectedType] = useState("All");
 
   return (
     <div className="container-fluid">
       <div className="row bg-info">
         <div className="col">
-          <Header />
+          <Header setSelected={setSelectedType} selected={selectedType} />
         </div>
       </div>
       <div className="row flex-grow-1">
