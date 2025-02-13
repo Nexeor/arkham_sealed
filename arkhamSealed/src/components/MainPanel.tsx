@@ -1,5 +1,6 @@
 import { CardQuery } from "../App";
 import useCycleCards from "../hooks/useCycleCards";
+import SearchForm from "./SearchForm";
 
 interface Props {
   cardQuery: CardQuery;
@@ -30,6 +31,7 @@ const MainPanel = ({ cardQuery, selectedType }: Props) => {
 
   return (
     <>
+      <SearchForm />
       <div className="container d-flex flex-wrap">
         {filteredData
           .filter((card) => card.type === "investigator")
