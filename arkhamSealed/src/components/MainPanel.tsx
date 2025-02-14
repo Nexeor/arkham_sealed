@@ -1,5 +1,4 @@
 import { CardQuery } from "../App";
-import { Card } from "../hooks/useCard";
 import useCardList from "../hooks/useCardList";
 import SearchForm from "./SearchForm";
 
@@ -24,8 +23,6 @@ const MainPanel = ({ cardQuery, setQuery, selectedType }: Props) => {
   const { data, error } = useCardList(cardQuery);
   console.log("data: ", data);
   // const [selectedFaction, setSelectedFaction] = useState("");
-  const cards = data?.results || [];
-  console.log("cards: ", cards);
 
   if (error) return <h1>{error}</h1>;
 

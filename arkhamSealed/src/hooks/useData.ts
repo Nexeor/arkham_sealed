@@ -3,7 +3,7 @@ import { AxiosRequestConfig, CanceledError } from "axios"
 import { useEffect, useState } from "react";
 
 interface FetchResponse<T> {
-    cards: T[],
+  cards: T[],
 }
 
 const useData = <T>(endpoint : string, requestConfig?: AxiosRequestConfig, deps?: any[]) => {

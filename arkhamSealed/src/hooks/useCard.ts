@@ -5,7 +5,7 @@ export interface Card {
     type: string;
     id: number;
     name: string;
-    imageURL: string;
+    image_url: string;
     faction: string;
     cardText: string;
 }

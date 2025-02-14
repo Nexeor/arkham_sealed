@@ -23,7 +23,7 @@ const useCardList = (cardQuery : CardQuery) => {
         params.factions = cardQuery.factions.join(',');
     }
 
-    return useData<CardList>('/cards/', { params }, [cardQuery])
+    return useData<Card>('/cards/', { params }, [cardQuery])
 }
 
 export default useCardList
