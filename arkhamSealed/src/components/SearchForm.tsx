@@ -2,11 +2,10 @@ import { FieldValues, useForm } from "react-hook-form";
 import { CardQuery } from "../App";
 
 interface Props {
-  cardQuery: CardQuery;
   setQuery: (query: CardQuery) => void;
 }
 
-const SearchForm = ({ cardQuery, setQuery }: Props) => {
+const SearchForm = ({ setQuery }: Props) => {
   const { register, handleSubmit } = useForm();
 
   const onSubmit = (data: FieldValues) => {

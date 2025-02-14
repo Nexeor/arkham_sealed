@@ -1,5 +1,5 @@
 import { CardQuery } from "../App";
-import { Card } from "./useCards";
+import { Card } from "./useCard";
 import useData from "./useData"
 
 const useCycleCards = (cardQuery : CardQuery) => useData<Card>('./cards/cycle', {

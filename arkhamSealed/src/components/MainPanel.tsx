@@ -1,5 +1,6 @@
 import { CardQuery } from "../App";
-import useCycleCards from "../hooks/useCycleCards";
+import { Card } from "../hooks/useCard";
+import useCardList from "../hooks/useCardList";
 import SearchForm from "./SearchForm";
 
 interface Props {
@@ -20,8 +21,11 @@ const typeMap: cardType = {
 
 const MainPanel = ({ cardQuery, setQuery, selectedType }: Props) => {
   const BASE = "https://arkhamdb.com/";
-  const { data, error } = useCycleCards(cardQuery);
+  const { data, error } = useCardList(cardQuery);
+  console.log("data: ", data);
   // const [selectedFaction, setSelectedFaction] = useState("");
+  const cards = data?.results || [];
+  console.log("cards: ", cards);
 
   if (error) return <h1>{error}</h1>;
 
@@ -32,7 +36,7 @@ const MainPanel = ({ cardQuery, setQuery, selectedType }: Props) => {
 
   return (
     <>
-      <SearchForm setQuery={setQuery} cardQuery={cardQuery} />
+      <SearchForm setQuery={setQuery} />
       <div className="container d-flex flex-wrap">
         {filteredData
           .filter((card) => card.type === "investigator")

@@ -5,14 +5,15 @@ export interface Card {
     type: string;
     id: number;
     name: string;
-    image_url: string;
+    imageURL: string;
     faction: string;
+    cardText: string;
 }
 
-const useCards = (cardQuery : CardQuery) => useData<Card>('./card/', {
+const useCard = (cardQuery : CardQuery) => useData<Card>('./card/', {
     params : {
         id: cardQuery.id
     }},
     [cardQuery])
 
-export default useCards 
+export default useCard
