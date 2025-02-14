@@ -4,6 +4,7 @@ import SearchForm from "./SearchForm";
 
 interface Props {
   cardQuery: CardQuery;
+  setQuery: (query: CardQuery) => void;
   selectedType: string;
 }
 
@@ -17,7 +18,7 @@ const typeMap: cardType = {
   Mythos: ["treachery"],
 };
 
-const MainPanel = ({ cardQuery, selectedType }: Props) => {
+const MainPanel = ({ cardQuery, setQuery, selectedType }: Props) => {
   const BASE = "https://arkhamdb.com/";
   const { data, error } = useCycleCards(cardQuery);
   // const [selectedFaction, setSelectedFaction] = useState("");
@@ -31,7 +32,7 @@ const MainPanel = ({ cardQuery, selectedType }: Props) => {
 
   return (
     <>
-      <SearchForm />
+      <SearchForm setQuery={setQuery} cardQuery={cardQuery} />
       <div className="container d-flex flex-wrap">
         {filteredData
           .filter((card) => card.type === "investigator")

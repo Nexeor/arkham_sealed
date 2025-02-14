@@ -1,8 +1,30 @@
 import { FieldValues, useForm } from "react-hook-form";
+import { CardQuery } from "../App";
 
-const SearchForm = () => {
+interface Props {
+  cardQuery: CardQuery;
+  setQuery: (query: CardQuery) => void;
+}
+
+const SearchForm = ({ cardQuery, setQuery }: Props) => {
   const { register, handleSubmit } = useForm();
-  const onSubmit = (data: FieldValues) => console.log(data);
+
+  const onSubmit = (data: FieldValues) => {
+    // Convert form data into CardQuery structure
+    const query: CardQuery = {
+      id: Date.now(), // Placeholder for ID, since it's not in the form
+      name: data.name || "",
+      cycle: "", // No cycle field in the form, so default empty
+      type: "", // No type field in the form, so default empty
+      factions: Object.keys(data.factions || {}).filter(
+        (key) => data.factions[key] // Keep only checked factions
+      ),
+      cardText: data.text || "",
+    };
+
+    console.log(query);
+    setQuery(query);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -28,26 +50,12 @@ const SearchForm = () => {
           className="form-control"
         />
       </div>
-      {/* PLACEHOLDER, MUST BE REPLACED WITH MULTI-SELECT*/}
-      <div className="mb-3">
-        <label htmlFor="category" className="form-label">
-          Traits
-        </label>
-        <select {...register("category")} id="category" className="form-select">
-          <option value="">Select Traits</option>
-          <option value="1">One</option>
-          <option value="2">Two</option>
-          <option value="3">Three</option>
-          <option value="4">Four</option>
-          <option value="5">Five</option>
-        </select>
-      </div>
       <div className="mb-3">
         <label className="form-label">Select Factions</label>
         <div className="form-check form-check-inline">
           {["Guardian", "Seeker", "Rogue", "Mystic", "Survivor", "Neutral"].map(
-            (option, index) => (
-              <div key={index} className="form-check form-check-inline">
+            (option) => (
+              <div key={option} className="form-check form-check-inline">
                 <input
                   type="checkbox"
                   className="form-check-input"

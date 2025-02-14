@@ -8,7 +8,8 @@ export interface CardQuery {
   name: string;
   cycle: string;
   type: string;
-  faction: string;
+  factions: string[];
+  cardText: string;
 }
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <div className="col col-10 bg-secondary">
           <MainPanel
             cardQuery={cardQuery}
+            setQuery={setCardQuery}
             selectedType={selectedType}
           ></MainPanel>
         </div>
