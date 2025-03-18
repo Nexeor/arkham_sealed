@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Table, create_engine
 from typing import Optional, List
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from db import Base
+from database.db import Base
 
 class Cycle(Base):
     __tablename__ = "cycle"

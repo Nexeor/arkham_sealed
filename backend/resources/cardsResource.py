@@ -1,7 +1,7 @@
 from flask_restful import Resource, fields, marshal
-from models import Cards
+from database.models import Cards
 from sqlalchemy import select
-from db import db
+from database.db import db
 
 card_fields = {
     'name' : fields.String,
@@ -22,5 +22,5 @@ class CardsResource(Resource):
     # Return all cards in DB
     # TODO: Param filtering
     def get(self):
-        result = db.scalars((select(Cards).where(Cards.type == "asset"))).all()
+        result = db.session.scalars((select(Cards).where(Cards.type == "asset"))).all()
         return [marshal(card, card_fields) for card in result]
