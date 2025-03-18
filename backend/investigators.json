@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Roland Banks",
+        "type": "investigator",
+        "image_url": "/bundles/cards/01001.png"
+    },
+    {
+        "name": "Daisy Walker",
+        "type": "investigator",
+        "image_url": "/bundles/cards/01002.png"
+    },
+    {
+        "name": "\"Skids\" O'Toole",
+        "type": "investigator",
+        "image_url": "/bundles/cards/01003.png"
+    },
+    {
+        "name": "Agnes Baker",
+        "type": "investigator",
+        "image_url": "/bundles/cards/01004.png"
+    },
+    {
+        "name": "Wendy Adams",
+        "type": "investigator",
+        "image_url": "/bundles/cards/01005.png"
+    }
+]

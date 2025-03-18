@@ -1,0 +1,308 @@
+[
+    {
+        "name": "Roland's .38 Special",
+        "type": "asset",
+        "image_url": "/bundles/cards/01006.png",
+        "faction": "neutral"
+    },
+    {
+        "name": "Daisy's Tote Bag",
+        "type": "asset",
+        "image_url": "/bundles/cards/01008.png",
+        "faction": "neutral"
+    },
+    {
+        "name": "The Necronomicon",
+        "type": "asset",
+        "image_url": "/bundles/cards/01009.png",
+        "faction": "neutral"
+    },
+    {
+        "name": "Heirloom of Hyperborea",
+        "type": "asset",
+        "image_url": "/bundles/cards/01012.png",
+        "faction": "neutral"
+    },
+    {
+        "name": "Wendy's Amulet",
+        "type": "asset",
+        "image_url": "/bundles/cards/01014.png",
+        "faction": "neutral"
+    },
+    {
+        "name": ".45 Automatic",
+        "type": "asset",
+        "image_url": "/bundles/cards/01016.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "Physical Training",
+        "type": "asset",
+        "image_url": "/bundles/cards/01017.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "Beat Cop",
+        "type": "asset",
+        "image_url": "/bundles/cards/01018.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "First Aid",
+        "type": "asset",
+        "image_url": "/bundles/cards/01019.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "Machete",
+        "type": "asset",
+        "image_url": "/bundles/cards/01020.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "Guard Dog",
+        "type": "asset",
+        "image_url": "/bundles/cards/01021.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "Police Badge",
+        "type": "asset",
+        "image_url": "/bundles/cards/01027.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "Beat Cop",
+        "type": "asset",
+        "image_url": "/bundles/cards/01028.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "Shotgun",
+        "type": "asset",
+        "image_url": "/bundles/cards/01029.png",
+        "faction": "guardian"
+    },
+    {
+        "name": "Magnifying Glass",
+        "type": "asset",
+        "image_url": "/bundles/cards/01030.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Old Book of Lore",
+        "type": "asset",
+        "image_url": "/bundles/cards/01031.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Research Librarian",
+        "type": "asset",
+        "image_url": "/bundles/cards/01032.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Dr. Milan Christopher",
+        "type": "asset",
+        "image_url": "/bundles/cards/01033.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Hyperawareness",
+        "type": "asset",
+        "image_url": "/bundles/cards/01034.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Medical Texts",
+        "type": "asset",
+        "image_url": "/bundles/cards/01035.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Magnifying Glass",
+        "type": "asset",
+        "image_url": "/bundles/cards/01040.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Disc of Itzamna",
+        "type": "asset",
+        "image_url": "/bundles/cards/01041.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Encyclopedia",
+        "type": "asset",
+        "image_url": "/bundles/cards/01042.png",
+        "faction": "seeker"
+    },
+    {
+        "name": "Switchblade",
+        "type": "asset",
+        "image_url": "/bundles/cards/01044.png",
+        "faction": "rogue"
+    },
+    {
+        "name": "Burglary",
+        "type": "asset",
+        "image_url": "/bundles/cards/01045.png",
+        "faction": "rogue"
+    },
+    {
+        "name": "Pickpocketing",
+        "type": "asset",
+        "image_url": "/bundles/cards/01046.png",
+        "faction": "rogue"
+    },
+    {
+        "name": ".41 Derringer",
+        "type": "asset",
+        "image_url": "/bundles/cards/01047.png",
+        "faction": "rogue"
+    },
+    {
+        "name": "Leo De Luca",
+        "type": "asset",
+        "image_url": "/bundles/cards/01048.png",
+        "faction": "rogue"
+    },
+    {
+        "name": "Hard Knocks",
+        "type": "asset",
+        "image_url": "/bundles/cards/01049.png",
+        "faction": "rogue"
+    },
+    {
+        "name": "Leo De Luca",
+        "type": "asset",
+        "image_url": "/bundles/cards/01054.png",
+        "faction": "rogue"
+    },
+    {
+        "name": "Cat Burglar",
+        "type": "asset",
+        "image_url": "/bundles/cards/01055.png",
+        "faction": "rogue"
+    },
+    {
+        "name": "Forbidden Knowledge",
+        "type": "asset",
+        "image_url": "/bundles/cards/01058.png",
+        "faction": "mystic"
+    },
+    {
+        "name": "Holy Rosary",
+        "type": "asset",
+        "image_url": "/bundles/cards/01059.png",
+        "faction": "mystic"
+    },
+    {
+        "name": "Shrivelling",
+        "type": "asset",
+        "image_url": "/bundles/cards/01060.png",
+        "faction": "mystic"
+    },
+    {
+        "name": "Scrying",
+        "type": "asset",
+        "image_url": "/bundles/cards/01061.png",
+        "faction": "mystic"
+    },
+    {
+        "name": "Arcane Studies",
+        "type": "asset",
+        "image_url": "/bundles/cards/01062.png",
+        "faction": "mystic"
+    },
+    {
+        "name": "Arcane Initiate",
+        "type": "asset",
+        "image_url": "/bundles/cards/01063.png",
+        "faction": "mystic"
+    },
+    {
+        "name": "Book of Shadows",
+        "type": "asset",
+        "image_url": "/bundles/cards/01070.png",
+        "faction": "mystic"
+    },
+    {
+        "name": "Grotesque Statue",
+        "type": "asset",
+        "image_url": "/bundles/cards/01071.png",
+        "faction": "mystic"
+    },
+    {
+        "name": "Leather Coat",
+        "type": "asset",
+        "image_url": "/bundles/cards/01072.png",
+        "faction": "survivor"
+    },
+    {
+        "name": "Scavenging",
+        "type": "asset",
+        "image_url": "/bundles/cards/01073.png",
+        "faction": "survivor"
+    },
+    {
+        "name": "Baseball Bat",
+        "type": "asset",
+        "image_url": "/bundles/cards/01074.png",
+        "faction": "survivor"
+    },
+    {
+        "name": "Rabbit's Foot",
+        "type": "asset",
+        "image_url": "/bundles/cards/01075.png",
+        "faction": "survivor"
+    },
+    {
+        "name": "Stray Cat",
+        "type": "asset",
+        "image_url": "/bundles/cards/01076.png",
+        "faction": "survivor"
+    },
+    {
+        "name": "Dig Deep",
+        "type": "asset",
+        "image_url": "/bundles/cards/01077.png",
+        "faction": "survivor"
+    },
+    {
+        "name": "Aquinnah",
+        "type": "asset",
+        "image_url": "/bundles/cards/01082.png",
+        "faction": "survivor"
+    },
+    {
+        "name": "Knife",
+        "type": "asset",
+        "image_url": "/bundles/cards/01086.png",
+        "faction": "neutral"
+    },
+    {
+        "name": "Flashlight",
+        "type": "asset",
+        "image_url": "/bundles/cards/01087.png",
+        "faction": "neutral"
+    },
+    {
+        "name": "Bulletproof Vest",
+        "type": "asset",
+        "image_url": "/bundles/cards/01094.png",
+        "faction": "neutral"
+    },
+    {
+        "name": "Elder Sign Amulet",
+        "type": "asset",
+        "image_url": "/bundles/cards/01095.png",
+        "faction": "neutral"
+    },
+    {
+        "name": "Lita Chantler",
+        "type": "asset",
+        "image_url": "/bundles/cards/01117.png",
+        "faction": "neutral"
+    }
+]

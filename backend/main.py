@@ -1,15 +1,25 @@
 from flask import Flask, request 
-from flask_restful import Api, Resource, abort, marshal_with, reqparse, fields
+from flask_restful import Api, Resource, marshal, abort, marshal_with, reqparse, fields
 from flask_cors import CORS
 from sqlalchemy import select
 from models import Cycle, Cards
-from db import SessionLocal
+from db import init_db
+from cardsResource import CardsResource
 
 app = Flask(__name__)
 api = Api(app)
-db = SessionLocal()
+init_db()
 CORS(app)
 
+# api.add_resource(CycleResource, "/cycle/<string:cycle_code>")
+# api.add_resource(CycleListResource, "/cycle-list/")
+# api.add_resource(CardResource, "/card/")
+api.add_resource(CardsResource, "/cards/cycle/"), 
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+'''
 cycle_fields = {
     'code' : fields.String,
     'name' : fields.String
@@ -17,13 +27,6 @@ cycle_fields = {
 
 cycle_list_fields = {
     'cycles' : fields.List(fields.Nested(cycle_fields))
-}
-
-card_fields = {
-    'name' : fields.String,
-    'type' : fields.String,
-    'image_url' : fields.String,
-    'faction': fields.String(attribute=lambda card: get_card_faction(card))
 }
 
 card_list_fields = {
@@ -61,7 +64,7 @@ class CardResource(Resource):
         if card_id:
             return db.scalars((select(Cards).where(Cards.id == card_id))).one()
         return db.scalars((select(Cards).where(Cards.id == 1))).one()
-    
+
 class CardsResource(Resource):
     @marshal_with(card_list_fields)
     def get(self):
@@ -81,11 +84,5 @@ class CardsResource(Resource):
 
         # Otherwise return core set
         return { "cards" : cards}
+'''
 
-api.add_resource(CycleResource, "/cycle/<string:cycle_code>")
-api.add_resource(CycleListResource, "/cycle-list/")
-api.add_resource(CardResource, "/card/")
-api.add_resource(CardsResource, "/cards/cycle/"), 
-
-if __name__ == "__main__":
-    app.run(debug=True)
